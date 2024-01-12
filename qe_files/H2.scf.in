@@ -1,0 +1,31 @@
+&CONTROL
+    calculation = 'scf',
+    outdir = './out_H2/',
+    prefix = 'H2',
+    pseudo_dir = './pseudo/',
+    restart_mode = 'from_scratch',
+    tstress = .TRUE.,
+    tprnfor = .TRUE.,
+    wf_collect = .FALSE.,
+    verbosity='high',
+/
+&SYSTEM
+    ibrav = 1,
+    celldm(1) = 10.0,
+    nat = 2,
+    ntyp = 1,
+    nspin = 1,
+    nbnd = 4,
+    ecutwfc = 20,
+/
+&ELECTRONS
+    conv_thr = 1.0d-8,
+    mixing_mode = 'plain',
+    diagonalization = 'david',
+/
+ATOMIC_SPECIES
+  H  1.00794  H_ONCV_PBE-1.2.upf
+ATOMIC_POSITIONS bohr
+  H  -0.7  0.0  0.0
+  H   0.7  0.0  0.0
+K_POINTS gamma
