@@ -1,0 +1,250 @@
+    Finished release [optimized] target(s) in 0.07s
+     Running `target/release/eri_rs -i tuvw -c 0 -d 4 -a 0 -b 4 -n 40`
+Using index type tuvw
+Start/end band core 0/4
+Start/end band active 0/4
+Using 40 rayon threads
+Using type f64 to represent eri elements!
+Kohn-Sham orbital information loaded from ../qe_files/out_H2/H2.save/wfc1.hdf5
+Data file schema loaded from ../qe_files/out_H2/H2.save/data-file-schema.xml
+Occupations of bands (selected in |...|): !
+| 1 0 0 0 | 
+Calculating 76 matrix elements with 40 threads!
+Building hashmap mapping Miller indices to coefficients...
+0/1503
+10/1503
+20/1503
+30/1503
+40/1503
+50/1503
+60/1503
+70/1503
+80/1503
+90/1503
+100/1503
+110/1503
+120/1503
+130/1503
+140/1503
+150/1503
+160/1503
+170/1503
+180/1503
+190/1503
+200/1503
+210/1503
+220/1503
+230/1503
+240/1503
+250/1503
+260/1503
+270/1503
+280/1503
+290/1503
+300/1503
+310/1503
+320/1503
+330/1503
+340/1503
+350/1503
+360/1503
+370/1503
+380/1503
+390/1503
+400/1503
+410/1503
+420/1503
+430/1503
+440/1503
+450/1503
+460/1503
+470/1503
+480/1503
+490/1503
+500/1503
+510/1503
+520/1503
+530/1503
+540/1503
+550/1503
+560/1503
+570/1503
+580/1503
+590/1503
+600/1503
+610/1503
+620/1503
+630/1503
+640/1503
+650/1503
+660/1503
+670/1503
+680/1503
+690/1503
+700/1503
+710/1503
+720/1503
+730/1503
+740/1503
+750/1503
+760/1503
+770/1503
+780/1503
+790/1503
+800/1503
+810/1503
+820/1503
+830/1503
+840/1503
+850/1503
+860/1503
+870/1503
+880/1503
+890/1503
+900/1503
+910/1503
+920/1503
+930/1503
+940/1503
+950/1503
+960/1503
+970/1503
+980/1503
+990/1503
+1000/1503
+1010/1503
+1020/1503
+1030/1503
+1040/1503
+1050/1503
+1060/1503
+1070/1503
+1080/1503
+1090/1503
+1100/1503
+1110/1503
+1120/1503
+1130/1503
+1140/1503
+1150/1503
+1160/1503
+1170/1503
+1180/1503
+1190/1503
+1200/1503
+1210/1503
+1220/1503
+1230/1503
+1240/1503
+1250/1503
+1260/1503
+1270/1503
+1280/1503
+1290/1503
+1300/1503
+1310/1503
+1320/1503
+1330/1503
+1340/1503
+1350/1503
+1360/1503
+1370/1503
+1380/1503
+1390/1503
+1400/1503
+1410/1503
+1420/1503
+1430/1503
+1440/1503
+1450/1503
+1460/1503
+1470/1503
+1480/1503
+1490/1503
+1500/1503
+s_minus_q_plus_r_mill Elapsed: 60.91s
+s_minus_q_plus_r_mill shape: [
+    1503,
+    1503,
+    1503,
+    3,
+]
+Calculation ERIs...
+Processed 8/76
+Processed 2/76
+Processed 1/76
+Processed 7/76
+Processed 5/76
+Processed 6/76
+Processed 9/76
+Processed 3/76
+Processed 4/76
+Processed 10/76
+Processed 11/76
+Processed 12/76
+Processed 13/76
+Processed 14/76
+Processed 15/76
+Processed 16/76
+Processed 18/76
+Processed 17/76
+Processed 19/76
+Processed 20/76
+Processed 21/76
+Processed 22/76
+Processed 23/76
+Processed 24/76
+Processed 26/76
+Processed 27/76
+Processed 25/76
+Processed 28/76
+Processed 29/76
+Processed 30/76
+Processed 31/76
+Processed 32/76
+Processed 33/76
+Processed 34/76
+Processed 35/76
+Processed 36/76
+Processed 37/76
+Processed 38/76
+Processed 39/76
+Processed 40/76
+Processed 45/76
+Processed 46/76
+Processed 53/76
+Processed 50/76
+Processed 51/76
+Processed 54/76
+Processed 48/76
+Processed 55/76
+Processed 43/76
+Processed 47/76
+Processed 44/76
+Processed 49/76
+Processed 52/76
+Processed 42/76
+Processed 41/76
+Processed 56/76
+Processed 57/76
+Processed 60/76
+Processed 58/76
+Processed 61/76
+Processed 62/76
+Processed 59/76
+Processed 63/76
+Processed 64/76
+Processed 65/76
+Processed 66/76
+Processed 67/76
+Processed 68/76
+Processed 69/76
+Processed 70/76
+Processed 71/76
+Processed 72/76
+Processed 73/76
+Processed 74/76
+Processed 75/76
+Processed 76/76
+ijVkl Elapsed: 662.46s
+Data written to output/eri_sym_rs_tuvw_0_4_f64.txt successfully!
