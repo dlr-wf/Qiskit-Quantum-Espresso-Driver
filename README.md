@@ -7,7 +7,7 @@ We start from a DFT calculation done with [QuantumEspresso](https://www.quantum-
 
 ## Requirements
 - Tested Python version: `3.11.5`
-- See [requirements.txt](./requirements.txt) for Python packages.
+- See [requirements.txt](requirements.txt) for Python packages.
 - Tested `nvcc` version:  
 `Cuda compilation tools, release 11.5, V11.5.50`  
 `Build cuda_11.5.r11.5/compiler.30411180_0`
@@ -18,11 +18,11 @@ We start from a DFT calculation done with [QuantumEspresso](https://www.quantum-
 - **Only normconserving pseudopotential can be used because then the Kohn-Sham orbitals are orthonormal. For ultrasoft pseudopotential a generalized eigenvalue problem is solved in DFT and the wavefunctions are only orthonormal w.r.t. to overlap matrix.**
 
 ## Usage
-1. Run a QuantumEspresso SCF DFT calculation with the [H2.scf.in](./qe_files/H2.scf.in): `pw.x -i H2.scf.in > H2.scf.out`. We ran the calculation twice, one with Quantum Espresso that outputs hdf5 files and one that output dat files.
-2. Save the momentum vectors $p$, Kohn-Sham coefficients $c_{i,p}$ and occupations with the [wfc_to_txt.py](./wfc_to_txt.py) script to files. [wfc_to_txt.py](./wfc_to_txt.py) can read both the dat and the hdf5 files.
-3. These text files are used for the calculation of electron repulsion integrals with CUDA (see the [cuda folder](./cuda_eri/)). The calculation is done in the [cuda source file](./cuda_eri/main_sym.cu) and can be compiled and executed manually with the `nvcc` compiler. The program writes the electron repulsion integrals in the Khon-Sham basis into a text output file. See an example of the [program output](./eri/cuda_output.txt) and [electron repulsion integrals](./eri/cuda_eri.txt) in the [eri](./eri/) folder. More information in respective [README.md](./cuda_eri/README.md).
-4. Instead of using CUDA we also provide a RUST implementation for calculation the electron repulsion integrals in the [rust_eri](./rust_eri/) folder. Instead of reading the momentum vectors $p$, coefficients $c_{i,p}$ and occupations from a text file, they are read from the Quantum Espresso xml and hdf5 output files. More information in respective [README.md](./rust_eri/README.md)
-5. The [main.py](./main.py) script loads the electron repulsion integrals from the text file and uses the QuantumEspresso DFT output to calculate the one-electron part of the Hamiltonian (see [calc_matrix_elements.py](./calc_matrix_elements.py) and [wfc.py](./wfc.py)). With this we define a Hamiltonian (see [hamiltonian.py](./hamiltonian.py)), a Qiskit electronic structure problem and a FCI solver. The ground state of the Hamiltonian is then found with the VQE algorithm in Qiskit and the FCI solver in PySCF.
+1. Run a QuantumEspresso SCF DFT calculation with the [H2.scf.in](qe_files/H2.scf.in): `pw.x -i H2.scf.in > H2.scf.out`. We ran the calculation twice, one with Quantum Espresso that outputs hdf5 files and one that output dat files.
+2. Save the momentum vectors $p$, Kohn-Sham coefficients $c_{i,p}$ and occupations with the [wfc_to_txt.py](wfc_to_txt.py) script to files. [wfc_to_txt.py](wfc_to_txt.py) can read both the dat and the hdf5 files.
+3. These text files are used for the calculation of electron repulsion integrals with CUDA (see the [cuda folder](cuda_eri/)). The calculation is done in the [cuda source file](cuda_eri/main_sym.cu) and can be compiled and executed manually with the `nvcc` compiler. The program writes the electron repulsion integrals in the Khon-Sham basis into a text output file. See an example of the [program output](eri/cuda_output.txt) and [electron repulsion integrals](eri/cuda_eri.txt) in the [eri](eri/) folder. More information in respective [README.md](cuda_eri/README.md).
+4. Instead of using CUDA we also provide a RUST implementation for calculation the electron repulsion integrals in the [rust_eri](rust_eri/) folder. Instead of reading the momentum vectors $p$, coefficients $c_{i,p}$ and occupations from a text file, they are read from the Quantum Espresso xml and hdf5 output files. More information in respective [README.md](rust_eri/README.md)
+5. The [main.py](main.py) script loads the electron repulsion integrals from the text file and uses the QuantumEspresso DFT output to calculate the one-electron part of the Hamiltonian (see [calc_matrix_elements.py](calc_matrix_elements.py) and [wfc.py](wfc.py)). With this we define a Hamiltonian (see [hamiltonian.py](hamiltonian.py)), a Qiskit electronic structure problem and a FCI solver. The ground state of the Hamiltonian is then found with the VQE algorithm in Qiskit and the FCI solver in PySCF.
 
 **Notes:**
 - We perform a spin-less DFT calculation. Therefore, the Kohn-Sham orbitals we use from the DFT calculation do not include spin. For the VQE and FCI calculation we use each Kohn-Sham orbital as a spin orbital which can hold two electrons, one with spin-up one with spin-down. Therefore 2 occupied Kohn-Sham orbitals correspond to 4 electrons, each occupying one spin orbital.
