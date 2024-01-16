@@ -48,7 +48,7 @@ class Wfc:
         self.b = np.array(
             [b1, b2, b3]
         )  # b1 in first row, b2 in second row, b3 in third row.
-        self.G = np.einsum("ij,kj->ik", mill, self.b)
+        self.G = np.einsum("ij,jk->ik", mill, self.b)
         self.k_plus_G = xk + self.G
         self.k_plus_G_norm = np.linalg.norm(self.k_plus_G, ord=2, axis=1)
 
