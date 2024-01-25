@@ -30,3 +30,6 @@ We start from a DFT calculation done with [QuantumEspresso](https://www.quantum-
 
 ## Authors
 - [Erik Schultheis](mailto:erik.schultheis@dlr.de)
+
+## Acknowledgements
+This software was developed within the [QuantiCoM project](https://qci.dlr.de/quanticom/) which is part of the [DLR Quantum Computing Initiative (QCI)](https://qci.dlr.de/). We acknowledge the support of the DLR Quantum Computing Initiative (QCI).

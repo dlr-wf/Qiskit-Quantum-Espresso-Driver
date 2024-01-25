@@ -1,6 +1,7 @@
 MIT License
 
 Copyright (c) 2024 Erik Schultheis, German Aerospace Center (DLR) - Deutsches Zentrum für Luft- und Raumfahrt e.V. (DLR).
+This software was developed within the QuantiCoM project which is part of the DLR Quantum Computing Initiative (QCI).
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
