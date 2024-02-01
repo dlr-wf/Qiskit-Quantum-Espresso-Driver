@@ -16,7 +16,7 @@ We start from a DFT calculation done with [QuantumEspresso](https://www.quantum-
 `cargo version: cargo 1.70.0 (ec8a8a0ca 2023-04-25)`  
 `rustc --version: rustc 1.70.0 (90c541806 2023-05-31)`
 - Tested QuantumEspresso version: `7.1` compiled with HDF5 `1.14.0`
-- **Only normconserving pseudopotential can be used because then the Kohn-Sham orbitals are orthonormal. For ultrasoft pseudopotential a generalized eigenvalue problem is solved in DFT and the wavefunctions are only orthonormal w.r.t. to overlap matrix.**
+- **Only normconserving pseudopotential can be currently used because then the Kohn-Sham orbitals are orthonormal. For ultrasoft pseudopotential a generalized eigenvalue problem is solved in DFT and the wavefunctions are only orthonormal w.r.t. to overlap matrix.**
 
 ## Usage
 1. Run a QuantumEspresso SCF DFT calculation with the [H2.scf.in](qe_files/H2.scf.in): `pw.x -i H2.scf.in > H2.scf.out`. We ran the calculation twice, one with Quantum Espresso that outputs hdf5 files and one that output dat files.

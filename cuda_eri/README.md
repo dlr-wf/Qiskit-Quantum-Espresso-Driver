@@ -10,14 +10,14 @@ Compile with `nvcc` compiler, e.g.: `nvcc eri_sym.cu -o eri_sym.o`
 ## Usage
 
 We specify the start and end orbitals of the active and core orbitals as parameters passed to the specific executables. Don't giving any arguments shows the needed arguments in the needed order.
-- Run [eri_sym.cu](/eri_sym.cu) for calculating $h_{tuvw}$ ERIs and only calculate independent matrix elements
-- Run [eri_frozen_core_iijj.cu](/eri_frozen_core_iijj.cu) for calculating $h_{iijj}$ ERIs in the frozen core approximation
-- Run [eri_frozen_core_ijji.cu](/eri_frozen_core_ijji.cu) for calculating $h_{ijji}$ ERIs in the frozen core approximation
-- Run [eri_frozen_core_tuii.cu](/eri_frozen_core_tuii.cu) for calculating $h_{tuii}$ ERIs in the frozen core approximation
-- Run [eri_frozen_core_tiiu.cu](/eri_frozen_core_tiiu.cu) for calculating $h_{tiiu}$ ERIs in the frozen core approximation
+- Run [eri_sym.cu](eri_sym.cu) for calculating $h_{tuvw}$ ERIs and only calculate independent matrix elements
+- Run [eri_frozen_core_iijj.cu](eri_frozen_core_iijj.cu) for calculating $h_{iijj}$ ERIs in the frozen core approximation
+- Run [eri_frozen_core_ijji.cu](eri_frozen_core_ijji.cu) for calculating $h_{ijji}$ ERIs in the frozen core approximation
+- Run [eri_frozen_core_tuii.cu](eri_frozen_core_tuii.cu) for calculating $h_{tuii}$ ERIs in the frozen core approximation
+- Run [eri_frozen_core_tiiu.cu](eri_frozen_core_tiiu.cu) for calculating $h_{tiiu}$ ERIs in the frozen core approximation
 
 
-Run [eri.cu](/eri.cu) for calculating $h_{tuvw}$ ERIs and calculate **all** matrix elements. Note that we need to set the `start_band` and `end_band` variables in [eri.cu](/eri.cu)
+Run [eri.cu](eri.cu) for calculating $h_{tuvw}$ ERIs and calculate **all** matrix elements. Note that we need to set the `start_band` and `end_band` variables in [eri.cu](eri.cu)
 
 ## Features
 - Calculate ERIs $h_{tuvw}=\bra{tu}\frac{1}{|\hat{r} _i-\hat{r}_j|}\ket{vw}$ where $\ket{t}$, $\ket{u}$, $\ket{v}$, $\ket{w}$ are Kohn-Sham orbitals expanded in the plane-wave basis. See [formulas](#formulas) section for more information.

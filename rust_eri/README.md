@@ -66,7 +66,7 @@ We found that the calculation of **one** ERI takes about $150$ seconds on an Int
 
 ## Notes
 #### Floating Point Type
-We use $32$- or $64$-bit floats to calculate the ERIs (defined by the `EriType` type in [main.rs](/src/main.rs)). We find that using $32$-bit floats leads to $3-5\%$ deviation from the results obtained with $64$-bit floats. Therefore, we encourage the usage of $64$-bit floats although it is computationally more demanding.
+We use $32$- or $64$-bit floats to calculate the ERIs (defined by the `EriType` type in [main.rs](src/main.rs)). We find that using $32$-bit floats leads to $3-5\%$ deviation from the results obtained with $64$-bit floats. Therefore, we encourage the usage of $64$-bit floats although it is computationally more demanding.
 
 #### Large RAM Usage
 We are aware of the large RAM usage ($\sim30$ GB) which is mainly because of storing all Miller indices and coefficients in a hashmap that maps Miller indices to coefficients, although the hashmap only stores references to the coefficients.
