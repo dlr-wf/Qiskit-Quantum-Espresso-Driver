@@ -13,8 +13,8 @@ For the ERIs we calculate
 
 ```math
 \begin{gather*}
-h_{tuvw}=\bra{tu}V\ket{vw}=\sum_{pqrs}c^\ast_{p,t}c^\ast_{q,u}c_{r,v}c_{s,w}\ \bra{pq}V\ket{rs}=\\
-\sum_{pqrs}c^\ast_{p,t}c^\ast_{q,u}c_{r,v}c_{s,w}\ \frac{4\pi}{|p-s|^2}\delta(p-(r+s-q)) = \sum_{qrs}c^\ast_{s-q+r,t}c^\ast_{q,u}c_{r,v}c_{s,w}\ \frac{4\pi}{|r-q|^2}\,,
+h_{tuvw}=\bra{tu}V\ket{vw}=\sum_{\substack{pqrs\\p\neq s}}c^\ast_{p,t}c^\ast_{q,u}c_{r,v}c_{s,w}\ \bra{pq}V\ket{rs}=\\
+\sum_{\substack{pqrs\\p\neq s}}c^\ast_{p,t}c^\ast_{q,u}c_{r,v}c_{s,w}\ \frac{4\pi}{|p-s|^2}\delta(p-(r+s-q)) = \sum_{\substack{qrs\\r\neq q}}c^\ast_{s-q+r,t}c^\ast_{q,u}c_{r,v}c_{s,w}\ \frac{4\pi}{|r-q|^2}\,,
 \end{gather*}
 ```
 where $p,q,r,s$ are momentum vectors. $c_{p,t}$ are the coefficients defining the Kohn-Sham orbitals $\ket{t}=\sum_G c_{G,t}\ \ket{k+G}$ where $G$ are momentum vectors and $k$ is a momentum vector defining the $k$-point.

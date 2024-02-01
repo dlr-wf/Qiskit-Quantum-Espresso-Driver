@@ -25,6 +25,16 @@ We start from a DFT calculation done with [QuantumEspresso](https://www.quantum-
 4. Instead of using CUDA we also provide a RUST implementation for calculation the electron repulsion integrals in the [rust_eri](rust_eri/) folder. Instead of reading the momentum vectors $p$, coefficients $c_{i,p}$ and occupations from a text file, they are read from the Quantum Espresso xml and hdf5 output files. See an example of the [program output](eri/rust_output.txt) and [electron repulsion integrals](eri/eri_sym_rs_tuvw_0_4_f64.txt) in the [eri](eri/) folder. More information in respective [README.md](rust_eri/README.md)
 5. The [main.py](main.py) script loads the electron repulsion integrals from the text file and uses the QuantumEspresso DFT output to calculate the one-electron part of the Hamiltonian (see [calc_matrix_elements.py](calc_matrix_elements.py) and [wfc.py](wfc.py)). With this we define a Hamiltonian (see [hamiltonian.py](hamiltonian.py)), a Qiskit electronic structure problem and a FCI solver. The ground state of the Hamiltonian is then found with the VQE algorithm in Qiskit and the FCI solver in PySCF.
 
+## Formulas
+We calculate the ERIs via explicit summation over momenta:
+```math
+\begin{gather*}
+h_{tuvw}=\bra{tu}V\ket{vw}=\sum_{\substack{pqrs\\p\neq s}}c^\ast_{p,t}c^\ast_{q,u}c_{r,v}c_{s,w}\ \bra{pq}V\ket{rs}=\\
+\sum_{\substack{pqrs\\p\neq s}}c^\ast_{p,t}c^\ast_{q,u}c_{r,v}c_{s,w}\ \frac{4\pi}{|p-s|^2}\delta(p-(r+s-q))\,,
+\end{gather*}
+```
+where $p,q,r,s$ are momentum vectors. $c_{p,t}$ are the coefficients defining the Kohn-Sham orbitals $\ket{t}=\sum_G c_{G,t}\ \ket{k+G}$ where $G$ are momentum vectors and $k$ is a momentum vector defining the $k$-point. More information in Rust and CUDA implementation readmes: [README Rust](rust_eri/README.md), [README Rust](cuda_eri/README.md)
+
 **Notes:**
 - We perform a spin-less DFT calculation. Therefore, the Kohn-Sham orbitals we use from the DFT calculation do not include spin. For the VQE and FCI calculation we use each Kohn-Sham orbital as a spin orbital which can hold two electrons, one with spin-up one with spin-down. Therefore 2 occupied Kohn-Sham orbitals correspond to 4 electrons, each occupying one spin orbital.
 
