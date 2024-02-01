@@ -26,6 +26,7 @@ We start from a DFT calculation done with [QuantumEspresso](https://www.quantum-
 5. The [main.py](main.py) script loads the electron repulsion integrals from the text file and uses the QuantumEspresso DFT output to calculate the one-electron part of the Hamiltonian (see [calc_matrix_elements.py](calc_matrix_elements.py) and [wfc.py](wfc.py)). With this we define a Hamiltonian (see [hamiltonian.py](hamiltonian.py)), a Qiskit electronic structure problem and a FCI solver. The ground state of the Hamiltonian is then found with the VQE algorithm in Qiskit and the FCI solver in PySCF.
 
 ## Formulas
+### ERIs via explicit summation
 We calculate the ERIs via explicit summation over momenta:
 ```math
 \begin{gather*}
@@ -33,10 +34,33 @@ h_{tuvw}=\bra{tu}V\ket{vw}=\sum_{\substack{pqrs\\p\neq s}}c^\ast_{p,t}c^\ast_{q,
 \sum_{\substack{pqrs\\p\neq s}}c^\ast_{p,t}c^\ast_{q,u}c_{r,v}c_{s,w}\ \frac{4\pi}{|p-s|^2}\delta(p-(r+s-q))\,,
 \end{gather*}
 ```
-where $p,q,r,s$ are momentum vectors. $c_{p,t}$ are the coefficients defining the Kohn-Sham orbitals $\ket{t}=\sum_G c_{G,t}\ \ket{k+G}$ where $G$ are momentum vectors and $k$ is a momentum vector defining the $k$-point. More information in Rust and CUDA implementation readmes: [README Rust](rust_eri/README.md), [README Rust](cuda_eri/README.md)
+where $p,q,r,s$ are momentum vectors. Note that all momenta $p$ are vectors but we ommit the vector arrow for brevity. $c_{p,t}$ are the coefficients defining the Kohn-Sham orbitals $\ket{t}=\sum_G c_{G,t}\ \ket{k+G}$ where $G$ are momentum vectors and $k$ is a momentum vector defining the $k$-point. More information in Rust and CUDA implementation readmes: [README Rust](rust_eri/README.md), [README Rust](cuda_eri/README.md).
+Explicit summation results in large computation times and should only be used to check other implementations. See the [pair density section](#eris-via-pair-densities) for a much faster way of calculating ERIs. 
+
+### ERIs via pair densities
+In [eri_pair_densities.py](eri_pair_densities.py) we calculate the ERIs via pair densities $\rho_{tu}(r)=\psi^\ast_t(r)\psi_u(r)$ of real space wavefunctions $\psi_t(r)$. Note that all real space coordinates $r$ are vectors but we ommit the vector arrow for brevity. With this the ERIs $h_{tuvw}$ in the Kohn-Sham basis can be written as
+$$h_{tuvw} = 4\pi \sum_{\substack{p\\p\neq 0}} \frac{\rho^\ast_{tw}(p) \rho_{uv}(p)}{|p|^2}$$
+with $\rho_{tu}(p)=\int\rho_{tu}(r) e^{-ip\cdot r}\mathrm{d}r$ which is the Fourier transform of $\rho_{tu}(r)$. Therefore $\rho_{tu}(p)$ is the convolution between $\psi^\ast_t(p)$ and $\psi_u(p)$: $\rho_{tu}(p)=\psi^\ast_t(p)*\psi_u(p)$. The python implementation in [eri_pair_densities.py](eri_pair_densities.py) outperformes the Rust and CUDA implementations, taking only a couple of seconds instead of several minutes. This is only caused by calculating a single sum plus some Fourier transformations instead of calculating a triple or quadruple sum in the Rust and CUDA implementations, respectively. This is not caused by performances differences in the used languages themselves.
+
+In  the following we present a derivation of the pair density representation of the ERIs. We start from the real space representation:
+$$h_{tuvw}=\int \int \psi^\ast_t(r_1)\psi^\ast_u(r_2)\psi_v(r_2)\psi_w(r_1) \frac{1}{|r_1-r_2|} \mathrm{d}r_1 \mathrm{d}r_2$$
+Using the definition of pair densities $\rho_{tu}(r)=\psi^\ast_t(r)\psi_u(r)$ and the Fourier transformation of the Coulomb potential
+$$\frac{1}{|r_1-r_2|}=\int\frac{4\pi}{|p|^2}e^{ip\cdot (r_1-r_2)}\mathrm{d}p$$
+we find
+$$h_{tuvw}=\int \int \rho_{tw}(r_1) \rho_{uv}(r_2) \int\frac{4\pi}{|p|^2}e^{ip\cdot (r_1-r_2)}\mathrm{d}p \mathrm{d}r_1 \mathrm{d}r_2$$
+Swapping integrals and using $e^{ip\cdot (r_1-r_2)}=e^{ip\cdot r_1}e^{-ip\cdot r_2}$ yields
+$$h_{tuvw}=\int \frac{4\pi}{|p|^2} \int \rho_{tw}(r_1) e^{ip\cdot r_1} \mathrm{d}r_1 \int  \rho_{uv}(r_2) e^{-ip\cdot r_2} \mathrm{d}r_2 \mathrm{d}p $$
+Using the Fourier transformation of the pair densities $\rho_{tu}(p)=\int\rho_{tu}(r) e^{-ip\cdot r}\mathrm{d}r$ results in
+$$h_{tuvw}=\int \frac{4\pi}{|p|^2} \rho^\ast_{tw}(p) \rho_{uv}(p) \mathrm{d}p$$
+For numerical calculation the integral turns into a sum over all momentum vector. To avoid the singularity at $p=0$ we ommit this momentum in the numerical summation:
+$$h_{tuvw}=\sum_{\substack{p \\ p \neq 0}} \frac{4\pi}{|p|^2} \rho^\ast_{tw}(p) \rho_{uv}(p)$$
+
 
 **Notes:**
 - We perform a spin-less DFT calculation. Therefore, the Kohn-Sham orbitals we use from the DFT calculation do not include spin. For the VQE and FCI calculation we use each Kohn-Sham orbital as a spin orbital which can hold two electrons, one with spin-up one with spin-down. Therefore 2 occupied Kohn-Sham orbitals correspond to 4 electrons, each occupying one spin orbital.
+- The implementation of calculation the ERIs via pair densities is inspired by [WEST](https://west-code.org/) and its implementation on [GitHub](https://github.com/west-code-development/West), especially the code in the [compute_eri_vc function](https://github.com/west-code-development/West/blob/master/Wfreq/solve_eri.f90#L327). Publications related when citing WEST: [Large Scale GW Calculations, M. Govoni and G. Galli, J. Chem. Theory Comput. 11, 2680 (2015)](https://pubs.acs.org/doi/10.1021/ct500958p) and [GPU Acceleration of Large-Scale Full-Frequency GW Calculations, V. Yu and M. Govoni, J. Chem. Theory Comput. 18, 4690 (2022)](https://pubs.acs.org/doi/10.1021/acs.jctc.2c00241). We note that, although inspiration was taken from the WEST implementation, no code from WEST was used.
+
+
 
 ## Authors
 - [Erik Schultheis](mailto:erik.schultheis@dlr.de)

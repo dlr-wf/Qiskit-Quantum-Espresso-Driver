@@ -4,6 +4,7 @@ import xmltodict
 from wfc import Wfc
 import calc_matrix_elements
 import hamiltonian
+import eri_pair_densities
 from eri_hashmap import EriHashmap, load_eri_from_file
 
 
@@ -50,6 +51,11 @@ if __name__ == "__main__":
     eri_hashmap = EriHashmap()
     eri_hashmap.update(indices_pqrs, mat_pqrs)
     h_pqrs: np.ndarray = eri_hashmap.get_tuvw(orbitals_indices) / wfc1_ncpp.cell_volume
+
+    # Cacluate ERIs via pair density instead of loading from Rust and CUDA output
+    h_pqrs_pair_density: np.ndarray = (
+        eri_pair_densities.eri_gamma(p=p, c_ip=c_ip_orbitals) / wfc1_ncpp.cell_volume
+    )
 
     h_pq = iTj_orbitals - iUj_orbitals
 

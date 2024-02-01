@@ -1,6 +1,7 @@
-# Recreate with Python 3.11 and newest package versions
+# Python 3.11
 
 h5py==3.10.0
 xmltodict==0.13.0
 qiskit-nature==0.7.1
 pyscf==2.4.0
+matplotlib==3.8.2
