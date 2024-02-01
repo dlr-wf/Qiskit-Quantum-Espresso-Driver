@@ -48,14 +48,14 @@ class Wfc:
         self.b = np.array(
             [b1, b2, b3]
         )  # b1 in first row, b2 in second row, b3 in third row.
-        self.G = np.einsum("ij,jk->ik", mill, self.b)
+        self.G = np.einsum("ij,kj->ik", mill, self.b)
         self.k_plus_G = xk + self.G
         self.k_plus_G_norm = np.linalg.norm(self.k_plus_G, ord=2, axis=1)
 
         # If only Γ point is sampled, only positive half of
         # the plane wave expansion coefficients are saved. Generate and append negative half here.
         # See https://docs.abinit.org/theory/wavefunctions/#plane-wave-basis-set-sphere
-        if self.gamma_only:
+        if self.gamma_only is True:
             self.evc_org = self.evc.copy()
             self.G_org = self.G.copy()
             self.mill_org = self.mill.copy()
@@ -164,13 +164,13 @@ class Wfc:
         # HDF5 files and all containing datasets also contain attributes which
         # can be obtained with f.attrs.keys().
 
-        # The coefficients alternate between the real and imaginary part(?)
+        # The coefficients alternate between the real and imaginary part
         evc_real_imag = np.array(f["evc"])
         mill = np.array(f["MillerIndices"])
         b1 = np.array(f["MillerIndices"].attrs["bg1"])
         b2 = np.array(f["MillerIndices"].attrs["bg2"])
         b3 = np.array(f["MillerIndices"].attrs["bg3"])
-        gamma_only = f.attrs["gamma_only"]
+        gamma_only = "TRUE" in str(f.attrs["gamma_only"])
         igwx = f.attrs["igwx"]
         ik = f.attrs["ik"]
         ispin = f.attrs["ispin"]
