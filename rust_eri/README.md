@@ -9,13 +9,14 @@ Calculate electron repulsion integrals from a QuantumEspresso DFT calculation.
 - Calculate ERIs for the Frozen Core Approximation (see [this](https://iopscience.iop.org/article/10.1088/2058-9565/abd334/pdf) and [this](https://pubs.aip.org/aip/jcp/article/154/11/114105/315377) paper), namely $h_{iijj}$, $h_{ijji}$, $h_{tuii}$, $h_{tiiu}$ where $i,j$ are core indices and $t,u$ are active indices.
 
 ## Formulas
-For the ERIs we calculate 
-$$
-h_{tuvw}=\bra{tu}V\ket{vw}=\sum_{pqrs}c^\ast_{p,t}c^\ast_{q,u}c_{r,v}c_{s,w}\ \bra{pq}V\ket{rs}=
-$$
-$$
+For the ERIs we calculate
+
+```math
+\begin{gather*}
+h_{tuvw}=\bra{tu}V\ket{vw}=\sum_{pqrs}c^\ast_{p,t}c^\ast_{q,u}c_{r,v}c_{s,w}\ \bra{pq}V\ket{rs}=\\
 \sum_{pqrs}c^\ast_{p,t}c^\ast_{q,u}c_{r,v}c_{s,w}\ \frac{4\pi}{|p-s|^2}\delta(p-(r+s-q)) = \sum_{qrs}c^\ast_{s-q+r,t}c^\ast_{q,u}c_{r,v}c_{s,w}\ \frac{4\pi}{|r-q|^2}\,,
-$$
+\end{gather*}
+```
 where $p,q,r,s$ are momentum vectors. $c_{p,t}$ are the coefficients defining the Kohn-Sham orbitals $\ket{t}=\sum_G c_{G,t}\ \ket{k+G}$ where $G$ are momentum vectors and $k$ is a momentum vector defining the $k$-point.
 
 ## Implementation Details
@@ -25,13 +26,13 @@ The momentum vectors $p$ are stored as a 2-dimensional array $A_p$ of shape $N_\
 
 #### Independent ERIs
 Not all $h_{tuvw}$ are independent. $h_{tuvw}$ obey the following symmetries:
-$$
+```math
 \begin{align*}
 h_{tuvw}&=h_{utwv}\quad\mathrm{(Hermiticity)}\\
 h_{tuvw}&=h^\ast_{wvut}\quad\mathrm{(Swap Symmetry)}\\
 h_{tuvw}&=h^\ast_{vwtu}\quad\mathrm{(Hermiticity+Swap)}\,.
 \end{align*}
-$$
+```
 We use these symmetries to only calculate independent matrix elements when calculating $h_{tuvw}$. Nevertheless, the output file contains all ERIs not only the independent ERIs.
 
 #### Concurrency
