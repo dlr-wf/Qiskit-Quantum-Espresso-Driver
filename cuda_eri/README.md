@@ -27,13 +27,13 @@ Run [eri.cu](eri.cu) for calculating $h_{tuvw}$ ERIs and calculate **all** matri
 ## Implementation Details
 #### Independent ERIs
 Not all $h_{tuvw}$ are independent. $h_{tuvw}$ obey the following symmetries:
-$$
-\begin{alignat}{1}
+```math
+\begin{align*}
 h_{tuvw}&=h_{utwv}\quad\mathrm{(Hermiticity)}\\
 h_{tuvw}&=h^\ast_{wvut}\quad\mathrm{(Swap Symmetry)}\\
 h_{tuvw}&=h^\ast_{vwtu}\quad\mathrm{(Hermiticity+Swap)}\,.
-\end{alignat}{}
-$$
+\end{align*}
+```
 We use these symmetries to only calculate independent matrix elements when calculating $h_{tuvw}$. Nevertheless, the output file contains all ERIs not only the independent ERIs.
 
 #### Concurrency
