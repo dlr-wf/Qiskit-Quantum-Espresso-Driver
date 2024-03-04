@@ -39,21 +39,24 @@ if __name__ == "__main__":
         p, c_ip_orbitals, wfc1_ncpp.atoms, wfc1_ncpp.cell_volume
     )
 
-    # Electron repulsion
-    eri_file = os.path.join("eri", "eri_sym_rs_tuvw_0_4_f64.txt")
+    # # Load Electron repulsion integrals from Rust calculation
+    # eri_file = os.path.join("eri", "eri_sym_rs_tuvw_0_4_f64.txt")
 
-    (
-        n_elements_pqrs,
-        n_states_pqrs,
-        indices_pqrs,
-        mat_pqrs,
-    ) = load_eri_from_file(eri_file, "tuvw")
-    eri_hashmap = EriHashmap()
-    eri_hashmap.update(indices_pqrs, mat_pqrs)
-    h_pqrs: np.ndarray = eri_hashmap.get_tuvw(orbitals_indices) / wfc1_ncpp.cell_volume
+    # (
+    #     n_elements_pqrs,
+    #     n_states_pqrs,
+    #     indices_pqrs,
+    #     mat_pqrs,
+    # ) = load_eri_from_file(eri_file, "tuvw")
+    # eri_hashmap = EriHashmap()
+    # eri_hashmap.update(indices_pqrs, mat_pqrs)
+    # h_pqrs: np.ndarray = eri_hashmap.get_tuvw(orbitals_indices) / wfc1_ncpp.cell_volume
 
     # Cacluate ERIs via pair density instead of loading from Rust and CUDA output
-    h_pqrs_pair_density: np.ndarray = (
+    assert (
+        wfc1_ncpp.gamma_only is True
+    ), "Calculating ERIs via pair densities is only implemented for the gamma-point!"
+    h_pqrs: np.ndarray = (
         eri_pair_densities.eri_gamma(p=p, c_ip=c_ip_orbitals) / wfc1_ncpp.cell_volume
     )
 

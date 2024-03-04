@@ -1,9 +1,4 @@
-import os
 import numpy as np
-from scipy import signal
-import xmltodict
-from wfc import Wfc
-import calc_matrix_elements
 
 # Calculate ERIs via h_ijkl = 4\pi \sum_p (\rho*_il(p) \rho_jk(p))/p²
 # with \rho_ij(p)=\int dr \rho_ij(r) e^(-ipr) which is the Fourier transform of

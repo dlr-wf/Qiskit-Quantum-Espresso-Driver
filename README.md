@@ -57,7 +57,7 @@ With this, the Coulomb matrix elements between four plane-waves can be written a
 ```math
 \begin{gather*}
 \bra{pq}V_C\ket{rs}=\int e^{-i(q-r)\cdot r_2}  e^{-i(p-s)\cdot r_2} \frac{4\pi}{|p-s|^2} \mathrm{d}r_2=\\
-\frac{4\pi}{|p-s|^2}\int e^{-i\left[(p-s)-(r-q)\right]\cot r_2} \mathrm{d}r_2=\\
+\frac{4\pi}{|p-s|^2}\int e^{-i\left[(p-s)-(r-q)\right]\cdot r_2} \mathrm{d}r_2=\\
 \frac{4\pi}{|p-s|^2}\delta\left((p-s)-(r-q)\right)\,,
 \end{gather*}
 ```
@@ -92,6 +92,7 @@ $$h_{tuvw}=\sum_{\substack{p, p \neq 0}} \frac{4\pi}{|p|^2} \rho^\ast_{tw}(p) \r
 
 **Notes:**
 - We perform a spin-less DFT calculation. Therefore, the Kohn-Sham orbitals we use from the DFT calculation do not include spin. For the VQE and FCI calculation we use each Kohn-Sham orbital as a spin orbital which can hold two electrons, one with spin-up one with spin-down. Therefore 2 occupied Kohn-Sham orbitals correspond to 4 electrons, each occupying one spin orbital.
+- The calculation of ERIs via pair densities is currently only implemented for $\Gamma$-point calculations.
 - The implementation of calculation the ERIs via pair densities is inspired by [WEST](https://west-code.org/) and its implementation on [GitHub](https://github.com/west-code-development/West), especially the code in the [compute_eri_vc function](https://github.com/west-code-development/West/blob/master/Wfreq/solve_eri.f90#L327). Publications related when citing WEST: [Large Scale GW Calculations, M. Govoni and G. Galli, J. Chem. Theory Comput. 11, 2680 (2015)](https://pubs.acs.org/doi/10.1021/ct500958p) and [GPU Acceleration of Large-Scale Full-Frequency GW Calculations, V. Yu and M. Govoni, J. Chem. Theory Comput. 18, 4690 (2022)](https://pubs.acs.org/doi/10.1021/acs.jctc.2c00241). We note that, although inspiration was taken from the WEST implementation, no code from WEST was used.
 
 
