@@ -16,7 +16,7 @@ We start from a DFT calculation done with [QuantumEspresso](https://www.quantum-
 `cargo version: cargo 1.70.0 (ec8a8a0ca 2023-04-25)`  
 `rustc --version: rustc 1.70.0 (90c541806 2023-05-31)`
 - Tested QuantumEspresso version: `7.1` compiled with HDF5 `1.14.0`
-- **Only normconserving pseudopotential can be currently used because then the Kohn-Sham orbitals are orthonormal. For ultrasoft pseudopotential a generalized eigenvalue problem is solved in DFT and the wavefunctions are only orthonormal w.r.t. to overlap matrix.**
+- **Only normconserving pseudopotentials can be currently used because then the Kohn-Sham orbitals are orthonormal. For ultrasoft pseudopotentials a generalized eigenvalue problem is solved in DFT and the wavefunctions are only orthonormal w.r.t. to overlap matrix.**
 
 ## Usage
 1. Run a QuantumEspresso SCF DFT calculation with the [H2.scf.in](qe_files/H2.scf.in): `pw.x -i H2.scf.in > H2.scf.out`. We ran the calculation twice, one with Quantum Espresso that outputs hdf5 files and one that output dat files.
@@ -91,11 +91,10 @@ $$h_{tuvw}=\sum_{\substack{p, p \neq 0}} \frac{4\pi}{|p|^2} \rho^\ast_{tw}(p) \r
 
 
 **Notes:**
+- The calculations of ERIs treat the singularity in the sum of momenta arising from the zero-momentum term by removing this term from the sum. For charge neutral systems this zero-momentum terms cancels with the zero-momentum term of the interaction between electrons and nuclei, and only contributes a constant term. See [Babbush, R. et al. (2018) ‘Low-Depth Quantum Simulation of Materials’, Physical Review X, 8(1).](https://doi.org/10.1103/PhysRevX.8.011044) and [Martin, R.M. (2020) Electronic Structure. Cambridge University Press.](https://doi.org/10.1017/9781108555586) for further information.
 - We perform a spin-less DFT calculation. Therefore, the Kohn-Sham orbitals we use from the DFT calculation do not include spin. For the VQE and FCI calculation we use each Kohn-Sham orbital as a spin orbital which can hold two electrons, one with spin-up one with spin-down. Therefore 2 occupied Kohn-Sham orbitals correspond to 4 electrons, each occupying one spin orbital.
 - The calculation of ERIs via pair densities is currently only implemented for $\Gamma$-point calculations.
-- The implementation of calculation the ERIs via pair densities is inspired by [WEST](https://west-code.org/) and its implementation on [GitHub](https://github.com/west-code-development/West), especially the code in the [compute_eri_vc function](https://github.com/west-code-development/West/blob/master/Wfreq/solve_eri.f90#L327). Publications related when citing WEST: [Large Scale GW Calculations, M. Govoni and G. Galli, J. Chem. Theory Comput. 11, 2680 (2015)](https://pubs.acs.org/doi/10.1021/ct500958p) and [GPU Acceleration of Large-Scale Full-Frequency GW Calculations, V. Yu and M. Govoni, J. Chem. Theory Comput. 18, 4690 (2022)](https://pubs.acs.org/doi/10.1021/acs.jctc.2c00241). We note that, although inspiration was taken from the WEST implementation, no code from WEST was used.
-
-
+- The implementation of calculating the ERIs via pair densities is inspired by [WEST](https://west-code.org/) and its implementation on [GitHub](https://github.com/west-code-development/West), especially the code in the [compute_eri_vc function](https://github.com/west-code-development/West/blob/master/Wfreq/solve_eri.f90#L327). Publications related when citing WEST: [Large Scale GW Calculations, M. Govoni and G. Galli, J. Chem. Theory Comput. 11, 2680 (2015)](https://pubs.acs.org/doi/10.1021/ct500958p) and [GPU Acceleration of Large-Scale Full-Frequency GW Calculations, V. Yu and M. Govoni, J. Chem. Theory Comput. 18, 4690 (2022)](https://pubs.acs.org/doi/10.1021/acs.jctc.2c00241). We note that, although inspiration was taken from the WEST implementation, no code from WEST was used.
 
 ## Authors
 - [Erik Schultheis](mailto:erik.schultheis@dlr.de)
