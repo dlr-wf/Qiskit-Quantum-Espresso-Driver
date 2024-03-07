@@ -5,7 +5,6 @@ from wfc import Wfc
 import calc_matrix_elements
 import hamiltonian
 import eri_pair_densities
-from eri_hashmap import EriHashmap, load_eri_from_file
 
 
 if __name__ == "__main__":
@@ -34,25 +33,11 @@ if __name__ == "__main__":
     iTj_orbitals = calc_matrix_elements.iTj(p, c_ip_orbitals)
 
     # Nuclear repulsion
-    pUq = calc_matrix_elements.pUq(p, wfc1_ncpp.atoms, wfc1_ncpp.cell_volume)
     iUj_orbitals = calc_matrix_elements.iUj(
         p, c_ip_orbitals, wfc1_ncpp.atoms, wfc1_ncpp.cell_volume
     )
 
-    # # Load Electron repulsion integrals from Rust calculation
-    # eri_file = os.path.join("eri", "eri_sym_rs_tuvw_0_4_f64.txt")
-
-    # (
-    #     n_elements_pqrs,
-    #     n_states_pqrs,
-    #     indices_pqrs,
-    #     mat_pqrs,
-    # ) = load_eri_from_file(eri_file, "tuvw")
-    # eri_hashmap = EriHashmap()
-    # eri_hashmap.update(indices_pqrs, mat_pqrs)
-    # h_pqrs: np.ndarray = eri_hashmap.get_tuvw(orbitals_indices) / wfc1_ncpp.cell_volume
-
-    # Cacluate ERIs via pair density instead of loading from Rust and CUDA output
+    # Cacluate ERIs via pair density
     assert (
         wfc1_ncpp.gamma_only is True
     ), "Calculating ERIs via pair densities is only implemented for the gamma-point!"
