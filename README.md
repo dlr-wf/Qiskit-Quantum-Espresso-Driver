@@ -37,11 +37,11 @@ h_{tuvw}=\bra{tu}V\ket{vw}=\sum_{\substack{pqrs\\p\neq s}}c^\ast_{p,t}c^\ast_{q,
 where $p,q,r,s$ are momentum vectors. Note that all momenta $p$ are vectors but we ommit the vector arrow for brevity. $c_{p,t}$ are the coefficients defining the Kohn-Sham orbitals $\ket{t}=\sum_G c_{G,t}\ \ket{k+G}$ where $G$ are momentum vectors and $k$ is a momentum vector defining the $k$-point.
 
 In the following we derive the above formula starting from calculating the Coulomb matrix elements between four plane-waves:
-$$\bra{pq}V_C\ket{rs}=\int\int \braket{pq}{r_1 r_2}\frac{1}{|r_1-r_2|} \braket{r_2 r_1}{rs} \mathrm{d}r_1\mathrm{d}r_2$$
-where we used $\bra{r_1 r_2}V_C\ket{r'_1 r'_2}=\frac{1}{|r_1-r_2|} \delta(r'_1-r_1)\delta(r'_2-r_2)$. Note that every integral is evaluated over three dimensions. Using the real space representation of plane-waves $\braket{r_2 r_1}{rs}=e^{i r\cdot r_2}e^{i s r_1}$ yields
+$$\bra{pq}V\ket{rs}=\int\int \braket{pq}{r_1 r_2}\frac{1}{|r_1-r_2|} \braket{r_2 r_1}{rs} \mathrm{d}r_1\mathrm{d}r_2$$
+where we used $\bra{r_1 r_2}V\ket{r'_1 r'_2}=\frac{1}{|r_1-r_2|} \delta(r'_1-r_1)\delta(r'_2-r_2)$. Note that every integral is evaluated over three dimensions. Using the real space representation of plane-waves $\braket{r_2 r_1}{rs}=e^{i r\cdot r_2}e^{i s r_1}$ yields
 ```math
 \begin{gather*}
-\bra{pq}V_C\ket{rs}=\int\int e^{-i(p-s)\cdot r_1} e^{-i(q-r)\cdot r_2} \frac{1}{|r_1-r_2|}  \mathrm{d}r_1\mathrm{d}r_2=\\
+\bra{pq}V\ket{rs}=\int\int e^{-i(p-s)\cdot r_1} e^{-i(q-r)\cdot r_2} \frac{1}{|r_1-r_2|}  \mathrm{d}r_1\mathrm{d}r_2=\\
 \int e^{-i(q-r)\cdot r_2} \mathrm{d}r_2 \int e^{-i(p-s)\cdot r_1} \frac{1}{|r_1-r_2|}  \mathrm{d}r_1\,.
 \end{gather*}
 ```
@@ -56,7 +56,7 @@ e^{-i p_\Delta \cdot r_2} \frac{4\pi}{|p_\Delta|^2}\,.
 With this, the Coulomb matrix elements between four plane-waves can be written as
 ```math
 \begin{gather*}
-\bra{pq}V_C\ket{rs}=\int e^{-i(q-r)\cdot r_2}  e^{-i(p-s)\cdot r_2} \frac{4\pi}{|p-s|^2} \mathrm{d}r_2=\\
+\bra{pq}V\ket{rs}=\int e^{-i(q-r)\cdot r_2}  e^{-i(p-s)\cdot r_2} \frac{4\pi}{|p-s|^2} \mathrm{d}r_2=\\
 \frac{4\pi}{|p-s|^2}\int e^{-i\left[(p-s)-(r-q)\right]\cdot r_2} \mathrm{d}r_2=\\
 \frac{4\pi}{|p-s|^2}\delta\left((p-s)-(r-q)\right)\,,
 \end{gather*}
@@ -64,7 +64,7 @@ With this, the Coulomb matrix elements between four plane-waves can be written a
 Where $\delta(p-q)$ is the Kronecker-delta in three dimensions. With these matrix elements we can now calculate the Coulomb matrix elements between four Kohn-Sham orbitals $t$, $u$, $v$, $w$:
 ```math
 \begin{gather*}
-\bra{tu}V_C\ket{vw}=\sum_{pqrs}c^\ast_{p,t}c^\ast_{q,u}c_{r,v}c_{s,w}\frac{4\pi}{|p-s|^2}\delta\left((p-s)-(r-q)\right)=\\
+\bra{tu}V\ket{vw}=\sum_{pqrs}c^\ast_{p,t}c^\ast_{q,u}c_{r,v}c_{s,w}\frac{4\pi}{|p-s|^2}\delta\left((p-s)-(r-q)\right)=\\
 \sum_{qrs}c^\ast_{s-q+r,t}c^\ast_{q,u}c_{r,v}c_{s,w}\frac{4\pi}{|r-q|^2}\,.
 \end{gather*}
 ```
