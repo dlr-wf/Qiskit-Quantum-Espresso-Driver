@@ -1,7 +1,7 @@
 import numpy as np
 import h5py
 import xmltodict
-from atoms import elements_to_atomic_number
+from .atoms import elements_to_atomic_number
 
 
 bohr_to_meter = 5.29177210903e-11  # Bohr radius in meter
@@ -74,6 +74,12 @@ class Wfc:
 
         with open(output_xml, encoding="utf-8") as file:
             xml_dict = xmltodict.parse(file.read())
+        self.spin = 1
+        if (
+            "nbnd_up" in xml_dict["qes:espresso"]["output"]["band_structure"]
+            and "nbnd_dw" in xml_dict["qes:espresso"]["output"]["band_structure"]
+        ):
+            self.spin = 2
         atoms_dict = xml_dict["qes:espresso"]["input"]["atomic_structure"][
             "atomic_positions"
         ]["atom"]
@@ -140,6 +146,13 @@ class Wfc:
         self.occupations_binary[
             np.abs(self.occupations_binary - 1.0) > np.abs(self.occupations_binary)
         ] = 0.0
+        # if self.spin == 2:
+        self.ks_energies_up = self.ks_energies[:nbnd]
+        self.ks_energies_dw = self.ks_energies[nbnd:]
+        self.occupations_up = self.occupations[:nbnd]
+        self.occupations_dw = self.occupations[nbnd:]
+        self.occupations_binary_up = self.occupations_binary[:nbnd]
+        self.occupations_binary_dw = self.occupations_binary[nbnd:]
 
         mill_to_c = {}
         for i, mill_idx in enumerate(self.mill):

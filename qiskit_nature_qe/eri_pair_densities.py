@@ -61,13 +61,19 @@ def pair_density_gamma(c_ip_array: np.ndarray) -> np.ndarray:
     return rho_ij_p
 
 
-def eri_gamma(p: np.ndarray, c_ip: np.ndarray) -> np.ndarray:
-    """Calculate Electron Repulsion Integrals (ERIs) via pair densities at the gamma point
-    We calculate h_ijkl=4\pi \sum_{p \neq 0} \rho*_il(p)\rho_jk(p)/|p|²
-    Since the momenta p and reciprocal space wavefunctions \psi_i(p) (given as c_ip)
-    are given as a list, we need to transfer \psi_i(p) to a 3D grid.
-    Then \psi_i(p) is represented on a 3D reciprocal space grid.
-    We calculate 1/|p|^2 on all grid points resulting in an infinite value at the
+def eri_gamma(
+    p: np.ndarray, c_ip_up: np.ndarray, c_ip_dw: np.ndarray | None = None
+) -> np.ndarray:
+    r"""Calculate Electron Repulsion Integrals (ERIs) via pair densities at the gamma point
+    We calculate $h_ijkl=4\pi \sum_{p \neq 0} \rho*_{il, \downarrow}(p)\rho_{jk, \uparrow}(p)/|p|²$,
+    where $\rho_{ij, \sigma}(p)$ is the Fourier transform of $\rho_{ij, \sigma}(r)=\phi*_i(r, \sigma)\phi_j(r, \sigma)$.
+    This is equivalent to
+    $h_ijkl=\int \int \frac{\phi^*_i(r_1, \downarrow)  \phi^*_j(r_2, \uparrow) \phi_k(r_2, \uparrow)  \phi_l(r_1, \downarrow)}{|r_1-r_2|}dr_1dr_2$
+    where $\phi_i(r, \sigma)$ are Kohn-Sham orbitals in real-space with the spin $\sigma$.
+    Since the momenta p and reciprocal space wavefunctions $\psi_i(p)$ (given as c_ip_up and c_ip_down)
+    are given as a list, we need to transfer $\psi_i(p)$ to a 3D grid.
+    Then $\psi_i(p)$ is represented on a 3D reciprocal space grid.
+    We calculate $1/|p|^2$ on all grid points resulting in an infinite value at the
     center of the grid. This infinite value is set to zero, therefore,
     technically we later perform a sum over all momenta p except the zero momenta.
     Note that there are different techniques handling with this singularity
@@ -80,7 +86,13 @@ def eri_gamma(p: np.ndarray, c_ip: np.ndarray) -> np.ndarray:
     Returns:
         np.ndarray: ERIs in reciprocal space
     """
-    nbands, nwaves = c_ip.shape  # number of DFT bands and number of plane waves
+    if c_ip_dw is None:
+        c_ip_dw = c_ip_up.copy()
+
+    nbands, nwaves = c_ip_up.shape  # number of KS orbitals and number of plane waves
+    assert (
+        c_ip_up.shape == c_ip_dw.shape
+    ), f"Shapes of spin-up and spin-down coefficients are different: {c_ip_up.shape} and {c_ip_dw.shape}!"
 
     # Extract maximum and minimum momenta in each direction
     p_min_x = p[:, 0].min()
@@ -92,9 +104,9 @@ def eri_gamma(p: np.ndarray, c_ip: np.ndarray) -> np.ndarray:
     # assume equally spaced grid and define spacing as the distance between the first two momenta vectors
     grid_spacing = np.linalg.norm(p[0] - p[1], ord=2)
 
-    # Initialize 3D array for each DFT band with zero
+    # Initialize 3D array for each KS orbital with zero
     # We therefore set \psi_i(p) on the whole momentum grid for each i
-    c_ip_array = np.zeros(
+    c_ip_up_array = np.zeros(
         (
             nbands,
             # Number of grid points for given maximum and minimum momenta and given grid spacing
@@ -102,8 +114,9 @@ def eri_gamma(p: np.ndarray, c_ip: np.ndarray) -> np.ndarray:
             int((p_max_y - p_min_y) / grid_spacing) + 1,
             int((p_max_z - p_min_z) / grid_spacing) + 1,
         ),
-        dtype=c_ip.dtype,
+        dtype=c_ip_up.dtype,
     )
+    c_ip_dw_array = c_ip_up_array.copy()
     # Set \psi_i(p) on given grid points
     for idx, coords in enumerate(p):
         x, y, z = coords  # momentum vector components in each direction
@@ -114,10 +127,11 @@ def eri_gamma(p: np.ndarray, c_ip: np.ndarray) -> np.ndarray:
             int((z - p_min_z) / grid_spacing),
         )
         # Set \psi_i(p) on given grid point at computed index
-        c_ip_array[:, i, j, k] = c_ip[:, idx]
+        c_ip_up_array[:, i, j, k] = c_ip_up[:, idx]
+        c_ip_dw_array[:, i, j, k] = c_ip_dw[:, idx]
 
     # Calculate |p|² for each grid point
-    p_norm_squared_array = np.zeros(c_ip_array.shape[1:])
+    p_norm_squared_array = np.zeros(c_ip_up_array.shape[1:])
     for i in range(p_norm_squared_array.shape[0]):
         x = (
             i * grid_spacing
@@ -133,18 +147,25 @@ def eri_gamma(p: np.ndarray, c_ip: np.ndarray) -> np.ndarray:
                 # Calculate norm of momentum vector
                 p_norm_squared_array[i, j, k] = x**2 + y**2 + z**2
     # Calculate 1/|p|²
+    p_norm_squared_array[p_norm_squared_array == 0] = np.inf
     one_over_p_norm_squared_array = 1 / p_norm_squared_array
     # Set infinite values to zero \sum_p -> \sum_{p \neq 0}
-    one_over_p_norm_squared_array[np.isinf(one_over_p_norm_squared_array)] = 0
+    # one_over_p_norm_squared_array[np.isinf(one_over_p_norm_squared_array)] = 0
 
     # Calculate pair density \rho_ij(p) in reciprocal space
-    rho_ij_p = pair_density_gamma(c_ip_array=c_ip_array)
+    rho_ij_p_up = pair_density_gamma(c_ip_array=c_ip_up_array)
+    rho_ij_p_dw = pair_density_gamma(c_ip_array=c_ip_dw_array)
     # Initialize ERI array
-    # TODO: We do not need to calculate al matrix elements due to symmetries
-    eri = np.zeros((nbands, nbands, nbands, nbands), dtype=c_ip.dtype)
+    # TODO: We do not need to calculate all matrix elements due to symmetries
+    eri = np.zeros((nbands, nbands, nbands, nbands), dtype=c_ip_up.dtype)
 
-    # Flatten arrays going from the 3D grid to a 1D list for each DFT band
-    rho_ij_p = np.reshape(rho_ij_p, newshape=(rho_ij_p.shape[0], rho_ij_p.shape[1], -1))
+    # Flatten arrays going from the 3D grid to a 1D list for each KS orbital
+    rho_ij_p_up = np.reshape(
+        rho_ij_p_up, newshape=(rho_ij_p_up.shape[0], rho_ij_p_up.shape[1], -1)
+    )
+    rho_ij_p_dw = np.reshape(
+        rho_ij_p_dw, newshape=(rho_ij_p_dw.shape[0], rho_ij_p_dw.shape[1], -1)
+    )
     one_over_p_norm_squared_array = np.reshape(
         one_over_p_norm_squared_array, newshape=(-1)
     )
@@ -155,8 +176,8 @@ def eri_gamma(p: np.ndarray, c_ip: np.ndarray) -> np.ndarray:
         * np.pi
         * np.einsum(
             "ilp, jkp, p -> ijkl",
-            rho_ij_p.conj(),
-            rho_ij_p,
+            rho_ij_p_dw.conj(),
+            rho_ij_p_up,
             one_over_p_norm_squared_array,
         )
     )

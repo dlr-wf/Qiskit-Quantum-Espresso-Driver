@@ -1,5 +1,4 @@
 from warnings import warn
-import os
 import numpy as np
 from qiskit_nature.second_q.problems.electronic_structure_result import (
     ElectronicStructureResult,
@@ -17,7 +16,7 @@ from qiskit.circuit import QuantumCircuit
 from qiskit_nature.second_q.circuit.library import UCCSD, HartreeFock
 from qiskit.primitives import Estimator
 import pyscf.fci
-import calc_matrix_elements
+from qiskit_nature_qe import calc_matrix_elements
 
 
 class second_quant_hamiltonian:

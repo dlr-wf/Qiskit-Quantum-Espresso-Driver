@@ -1,10 +1,8 @@
 import os
 import numpy as np
 import xmltodict
-from wfc import Wfc
-import calc_matrix_elements
+from qiskit_nature_qe import calc_matrix_elements, eri_pair_densities, wfc
 import hamiltonian
-import eri_pair_densities
 
 
 if __name__ == "__main__":
@@ -15,7 +13,7 @@ if __name__ == "__main__":
     # Choose Kohn-Sham orbitals
     orbitals_indices = [0, 1]
 
-    wfc1_ncpp = Wfc.from_file(hdf5_file, xml_file)
+    wfc1_ncpp = wfc.Wfc.from_file(hdf5_file, xml_file)
 
     with open(xml_file, "r", encoding="utf-8") as file:
         xml_dict = xmltodict.parse(file.read())
@@ -42,7 +40,7 @@ if __name__ == "__main__":
         wfc1_ncpp.gamma_only is True
     ), "Calculating ERIs via pair densities is only implemented for the gamma-point!"
     h_pqrs: np.ndarray = (
-        eri_pair_densities.eri_gamma(p=p, c_ip=c_ip_orbitals) / wfc1_ncpp.cell_volume
+        eri_pair_densities.eri_gamma(p=p, c_ip_up=c_ip_orbitals) / wfc1_ncpp.cell_volume
     )
 
     h_pq = iTj_orbitals - iUj_orbitals

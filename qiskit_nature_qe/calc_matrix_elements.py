@@ -54,10 +54,8 @@ def check_symmetry_two_body_matrix(matrix: np.ndarray):
     matrix_hermitian = matrix.T.conj()
     matrix_hemitian_swap = matrix.T.conj().swapaxes(0, 1).swapaxes(2, 3)
 
-    allclose_swap = np.allclose(matrix, matrix_swap)  # , rtol=1e-5, atol=1e-5)
-    allclose_hermitian = np.allclose(
-        matrix, matrix_hermitian
-    )  # , rtol=1e-5, atol=1e-5)
+    allclose_hermitian = np.allclose(matrix, matrix_swap)  # , rtol=1e-5, atol=1e-5)
+    allclose_swap = np.allclose(matrix, matrix_hermitian)  # , rtol=1e-5, atol=1e-5)
     allclose_hermitian_swap = np.allclose(
         matrix, matrix_hemitian_swap
     )  # , rtol=1e-5, atol=1e-5)
