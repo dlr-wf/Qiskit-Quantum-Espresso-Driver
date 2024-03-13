@@ -1,6 +1,9 @@
 # Qiskit Quantum Espresso Driver
 [![DOI](https://zenodo.org/badge/742501230.svg)](https://zenodo.org/doi/10.5281/zenodo.10513424)
 
+## Disclaimer:
+Since [qiskit_nature](https://qiskit-community.github.io/qiskit-nature/) does indirectly not support complex expansion coefficients (see [this issue](https://github.com/qiskit-community/qiskit-nature/issues/1351)) the provided code does currently not work with qiskit_nature.
+
 ## Introduction
 This repository provides an interface between the [QuantumEspresso](https://www.quantum-espresso.org/) DFT software and [Qiskit](https://www.ibm.com/quantum/qiskit). QuantumEspresso uses a plane-wave basis to express the Kohn-Sham orbitals. We extract the Kohn-Sham orbitals from a QuantumEspresso calculation to construct a many-body hamiltonian in Qiskit by calculating the necessary matrix elements.
 
@@ -9,15 +12,19 @@ We start from a DFT calculation done with [QuantumEspresso](https://www.quantum-
 ## Requirements
 - Tested Python version: `3.11.5`
 - See [requirements.txt](requirements.txt) for Python packages.
-- Tested QuantumEspresso version: `7.1` compiled with HDF5 `1.14.0`
-- **Only normconserving pseudopotentials can be currently used because then the Kohn-Sham orbitals are orthonormal. For ultrasoft pseudopotentials a generalized eigenvalue problem is solved in DFT and the wavefunctions are only orthonormal w.r.t. to overlap matrix.**
+- Tested QuantumEspresso version: `7.1` compiled with HDF5 `1.14.0` (HDF5 support is not needed)
+- **Only normconserving pseudopotentials can be currently used because then the Kohn-Sham orbitals are orthonormal. For ultrasoft pseudopotentials a generalized eigenvalue problem is solved in DFT and the wavefunctions are only orthonormal w.r.t. to an overlap matrix.**
 
 ## Usage
-1. Run a QuantumEspresso SCF DFT calculation with the [H2.scf.in](qe_files/H2.scf.in): `pw.x -i H2.scf.in > H2.scf.out`. We ran the calculation twice, one with Quantum Espresso that outputs hdf5 files and one that output dat files.
-2. The [main.py](main.py) script calculates the electron repulsion integrals via pair densities (see [eri_pair_densities.py](eri_pair_densities.py)) and calculates the one-electron part of the Hamiltonian (see [calc_matrix_elements.py](calc_matrix_elements.py) and [wfc.py](wfc.py)) using the QuantumEspresso DFT output. With this we define a Hamiltonian (see [hamiltonian.py](hamiltonian.py)), a Qiskit electronic structure problem and a FCI solver. The ground state of the Hamiltonian is then found with the VQE algorithm in Qiskit and the FCI solver in PySCF.
+1. Run a QuantumEspresso SCF DFT calculation with the [H2.scf.in](qe_files/H2.scf.in): `pw.x -i H2.scf.in > H2.scf.out`.
+2. The [demo_nospin.py](demo_nospin.py) and [demo_spin.py](demo_spin.py) scripts created a qiskit `ElectronicStructureProblem` (see [qe_driver.py](qiskit_nature_qe/qe_driver.py)) by calculating the electron repulsion integrals via pair densities (see [eri_pair_densities.py](qiskit_nature_qe/eri_pair_densities.py)) and by calculating the one-electron part of the Hamiltonian (see [calc_matrix_elements.py](qiskit_nature_qe/calc_matrix_elements.py) and [wfc.py](qiskit_nature_qe/wfc.py)) using the QuantumEspresso DFT output. The ground state of the problem is then found with the numpy ground-state solver in qiskit.
+
+Note that the `QE_Driver` class in [qe_driver.py](qiskit_nature_qe/qe_driver.py) also provides a function `solve_fci` which uses PySCF to perform exact diagonalization of the electronic structure Hamiltonian.
 
 ## Formulas
 ### ERIs via pair densities
+We calculate the electron repulsion integrals (ERIs) given as
+$$h_{tuvw} = \int \int \frac{\phi^*_t(r_1)  \phi^*_u(r_2) \phi_v(r_2)  \phi_w(r_1)}{|r_1-r_2|}dr_1dr_2$$
 In [eri_pair_densities.py](eri_pair_densities.py) we calculate the ERIs via pair densities $\rho_{tu}(r)=\psi^\ast_t(r)\psi_u(r)$ of real space wavefunctions $\psi_t(r)$. Note that all real space coordinates $r$ are vectors but we ommit the vector arrow for brevity. With this the ERIs $h_{tuvw}$ in the Kohn-Sham basis can be written as
 $$h_{tuvw} = 4\pi \sum_{\substack{p, p\neq 0}} \frac{\rho^\ast_{tw}(p) \rho_{uv}(p)}{|p|^2}$$
 with $\rho_{tu}(p)=\int\rho_{tu}(r) e^{-ip\cdot r}\mathrm{d}r$ which is the Fourier transform of $\rho_{tu}(r)$. Therefore $\rho_{tu}(p)$ is the convolution between $\psi^\ast_t(p)$ and $\psi_u(p)$: $\rho_{tu}(p)=\psi^\ast_t(p)*\psi_u(p)$.
@@ -34,6 +41,20 @@ Using the Fourier transformation of the pair densities $\rho_{tu}(p)=\int\rho_{t
 $$h_{tuvw}=\int \frac{4\pi}{|p|^2} \rho^\ast_{tw}(p) \rho_{uv}(p) \mathrm{d}p$$
 For numerical calculation the integral turns into a sum over all momentum vector. To avoid the singularity at $p=0$ we ommit this momentum in the numerical summation:
 $$h_{tuvw}=\sum_{\substack{p, p \neq 0}} \frac{4\pi}{|p|^2} \rho^\ast_{tw}(p) \rho_{uv}(p)$$
+
+### One-Electron Integrals
+The one-electron integrals
+$$h_{tu}=\int \phi^\ast_t(r) \left( -\frac{1}{2} \nabla^2 - \sum_{I} \frac{Z_I}{R_I- r} + \sum_{I\lt J} \frac{Z_I Z_J}{|R_I-R_J|} \right) \phi_u(r)\mathrm{d}r$$
+are also calculated in the plane-wave basis. We split the above formula into its three parts:
+$$h_{tu}=t_{tu} - u_{tu} +c_{tu}$$
+with
+$$t_{tu}=\int \phi^\ast_t(r) \left(  -\frac{1}{2} \nabla^2 \right) \phi_u(r)\mathrm{d}r$$
+$$u_{tu}=\int \phi^\ast_t(r) \left( \sum_{I} \frac{Z_I}{R_I- r} \right) \phi_u(r)\mathrm{d}r$$
+$$c_{tu}=\int \phi^\ast_t(r)  \phi_u(r)\mathrm{d}r \left(  \sum_{I\lt J} \frac{Z_I Z_J}{|R_I-R_J|} \right)=\sum_{I\lt J} \frac{Z_I Z_J}{|R_I-R_J|}$$
+where we assumed a orthonormal basis in the last step in defining $c_{tu}$.
+In the momentum basis using the Fourier transformation of kinetic energy and the coulomb potential we find:
+$$t_{tu}= \frac{1}{2}\int\phi_t(p)p^2 \phi_u(p)\mathrm{d}p$$
+$$u_{tu} = \frac{4\pi}{\Omega} \sum_{p,q,p\neq q} \phi_t(p)^\ast \phi_t(q) \frac{1}{|q-p|^2} \sum_I   e^{-i (q-p) \cdot R_I} $$
 
 
 **Notes:**

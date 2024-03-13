@@ -146,13 +146,17 @@ class Wfc:
         self.occupations_binary[
             np.abs(self.occupations_binary - 1.0) > np.abs(self.occupations_binary)
         ] = 0.0
-        # if self.spin == 2:
         self.ks_energies_up = self.ks_energies[:nbnd]
-        self.ks_energies_dw = self.ks_energies[nbnd:]
         self.occupations_up = self.occupations[:nbnd]
-        self.occupations_dw = self.occupations[nbnd:]
         self.occupations_binary_up = self.occupations_binary[:nbnd]
-        self.occupations_binary_dw = self.occupations_binary[nbnd:]
+        if self.spin == 2:
+            self.ks_energies_dw = self.ks_energies[nbnd:]
+            self.occupations_dw = self.occupations[nbnd:]
+            self.occupations_binary_dw = self.occupations_binary[nbnd:]
+        else:
+            self.ks_energies_dw = self.ks_energies_up
+            self.occupations_dw = self.occupations_up
+            self.occupations_binary_dw = self.occupations_binary_up
 
         mill_to_c = {}
         for i, mill_idx in enumerate(self.mill):

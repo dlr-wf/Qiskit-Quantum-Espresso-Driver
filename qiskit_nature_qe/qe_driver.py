@@ -54,7 +54,8 @@ class QE_Driver(ElectronicStructureDriver):
             self.nspin = 1
             if self.wfc_up_obj.spin != self.nspin:
                 warn(
-                    "The xml file belongs to a spin-polarized calculation but only one wfc files is provided!"
+                    f"In {self.__class__.__name__}.{self.__init__.__name__}:\n"
+                    + "The xml file belongs to a spin-polarized calculation but only one wfc files is provided!"
                 )
 
         with open(xml_file, "r", encoding="utf-8") as file:
@@ -91,7 +92,10 @@ class QE_Driver(ElectronicStructureDriver):
             ]
             != "true"
         ):
-            warn("The QuantumEspresso SCF calculation is not converged")
+            warn(
+                f"In {self.__class__.__name__}.{self.__init__.__name__}:\n"
+                + "The QuantumEspresso SCF calculation is not converged"
+            )
 
         self.p = self.wfc_up_obj.k_plus_G  # shape (#waves, 3)
 
@@ -100,12 +104,22 @@ class QE_Driver(ElectronicStructureDriver):
         self.c_ip_up = self.wfc_up_obj.evc
         self.c_ip_dw = self.wfc_dw_obj.evc
 
-    def run(self) -> ElectronicStructureProblem:
+    def run(self=True) -> ElectronicStructureProblem:
         return self.to_problem()
 
     def to_problem(
-        self, basis: ElectronicBasis = ElectronicBasis.MO, include_dipole: bool = False
+        self,
+        basis: ElectronicBasis = ElectronicBasis.MO,
+        include_dipole: bool = False,
     ) -> ElectronicStructureProblem:
+        if basis != ElectronicBasis.MO:
+            warn(
+                f"In {self.__class__.__name__}.{self.to_problem.__name__}:\n"
+                + "Using MO basis although AO basis was specified, "
+                + "since the AO basis is the plane-wave basis and typically "
+                + "a large number of plane-waves is used which would result "
+                + "in large matrices!"
+            )
         basis: ElectronicBasis = ElectronicBasis.MO
         include_dipole: bool = False
 
@@ -147,18 +161,50 @@ class QE_Driver(ElectronicStructureDriver):
             self.wfc_up_obj.atoms, self.wfc_up_obj.cell_volume
         )
 
-        # overlap = self.wfc_up_obj.get_overlaps()
-        # FIXME: Is the following correct for calculating the overlap matrix?
-        evc_up_dw = np.concatenate([self.c_ip_up, self.c_ip_dw])
-        overlap = np.einsum("ij, kj -> ik", evc_up_dw.conj(), evc_up_dw)
+        # ??? Is the following correct for calculating the overlap matrix?
+        #     We search for the overlap matrix between two AOs, i.e. plane-waves
+        #     which should be the identity, right?
+        #     For spin-polarized QE calculations (self.c_ip_up.conj() @ self.c_ip_up.T)
+        #     and (self.c_ip_dw.conj() @ self.c_ip_dw.T) are the overlap matrices between the
+        #     Kohn-Sham orbitals of up- and down-spin, respectively. Both of them are
+        #     identity matrices. But the overlap between up- and down-spin
+        #     (self.c_ip_up.conj() @ self.c_ip_dw.T) is used to calculate the
+        #     AngularMomentum operator in qcschema_to_problem.
+        #     See qiskit_nature.second_q.formats.qcschema_translator.get_overlap_ab_from_qcschema
+        #     where (self.c_ip_up @ self.c_ip_dw.T) instead of (self.c_ip_up.conj() @ self.c_ip_dw.T)
+        #     is calculated if the overlap matrix is the identity (as is the case here) and note
+        #     that coeff_a is equal to self.c_ip_up.T which is the same as data.mo_coeff below.
+        #     We suspect that there is a bug in
+        #     qiskit_nature.second_q.formats.qcschema_translator.get_overlap_ab_from_qcschema
+        #     and coeff_a.T.conj() @ overlap @ coeff_b would be the correct formula.
+        #     Note that the ground state needs to have a zero angular momentum.
+        #     For our example of H_2 with the identity matrix as the overlap matrix the
+        #     angular momentum expectation value of the ground state is ~1e-8 for which
+        #     np.isclose(~1e-8, 0.0) is False. Therefore, the ground-state is not identified
+        #     as the ground state by the numpy ground-state eigensolver.
+        #     The numpy ground-state eigensolver would find the correct ground-state if
+        #     the overlap calculated with the get_overlap_ab_from_qcschema function would
+        #     return the identity matrix which can be forced by setting data.overlap
+        #     below to None.
+        #     For our example of H_2 (self.c_ip_up.conj() @ self.c_ip_dw.T) is not equal
+        #     to the identity matrix. Note that (self.c_ip_up.conj() @ self.c_ip_dw.T) =
+        #     (self.c_ip_up.conj() @ overlap @ self.c_ip_dw.T) if overlap is the identity matrix
+        #     which is the case for our plane-wave AO basis. We think that
+        #     (self.c_ip_up.conj() @ self.c_ip_dw.T) does not have to be the identity matrix
+        #     but the angular momentum has to be zero for the ground state.
+        #     We have to further investigate different spin-polarized DFT calculation and
+        #     the angular momentum of their many-body ground states to check if
+        #     there is a bug in qiskit_nature or in our understand of the overlap matrix
+        overlap = np.eye(self.c_ip_up.shape[1])
+        # overlap = None
 
         # Molecular orbitals (MOs) are the Kohn-Sham orbitals
         # Atomic orbitals (AOs) are the plane-waves
         # Up=a, down=b
         data = _QCSchemaData()
-        # data.hij
-        # data.hij_b
-        # data.eri
+        # data.hij # h_ij in atomic orbital basis, i.e. plane-waves in our case
+        # data.hij_b # h_ij_b in atomic orbital basis, i.e. plane-waves in our case
+        # data.eri # eri in atomic orbital basis, i.e. plane-waves in our case
         data.hij_mo = h_ij_up
         data.hij_mo_b = h_ij_dw
 
@@ -170,9 +216,12 @@ class QE_Driver(ElectronicStructureDriver):
         data.e_ref = self.reference_energy
         data.overlap = overlap
 
-        # FIXME: Is the following correct for calculating the mo coefficients?
-        data.mo_coeff = np.einsum("ij, kj -> ik", self.c_ip_up.conj(), self.c_ip_up)
-        data.mo_coeff_b = np.einsum("ij, kj -> ik", self.c_ip_dw.conj(), self.c_ip_dw)
+        data.mo_coeff = (
+            self.c_ip_up.T
+        )  # shape: (nao, nmo) = (#plane-waves, #kohn-sham orbitals)
+        data.mo_coeff_b = (
+            self.c_ip_dw.T
+        )  # shape: (nao, nmo) = (#plane-waves, #kohn-sham orbitals)
 
         data.mo_energy = self.wfc_up_obj.ks_energies
         data.mo_energy_b = self.wfc_dw_obj.ks_energies
@@ -334,6 +383,11 @@ class QE_Driver(ElectronicStructureDriver):
             nelec=nelec,
             nroots=nroots,
         )
+
+        # Save eigenvalues and -vectors in lists
+        if n_energies == 1:
+            self.fci_evs = np.array([self.fci_evs])
+            self.fci_evcs = [self.fci_evcs]
 
         fci_energy = self.fci_evs + nucl_repulsion
 

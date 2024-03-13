@@ -101,7 +101,7 @@ def eri_gamma(
     p_max_y = p[:, 1].max()
     p_min_z = p[:, 2].min()
     p_max_z = p[:, 2].max()
-    # assume equally spaced grid and define spacing as the distance between the first two momenta vectors
+    # assume equally spaced grid and define spacing as the distance between the first two momentum vectors
     grid_spacing = np.linalg.norm(p[0] - p[1], ord=2)
 
     # Initialize 3D array for each KS orbital with zero
