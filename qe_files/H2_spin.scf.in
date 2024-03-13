@@ -1,7 +1,7 @@
 &CONTROL
     calculation = 'scf',
-    outdir = './out_H2/',
-    prefix = 'H2',
+    outdir = './out_H2_spin/',
+    prefix = 'H2_spin',
     pseudo_dir = './pseudo/',
     restart_mode = 'from_scratch',
     tstress = .TRUE.,
@@ -14,8 +14,10 @@
     celldm(1) = 10.0,
     nat = 2,
     ntyp = 1,
+    nspin = 2,
     nbnd = 4,
     ecutwfc = 20,
+    tot_magnetization = 0,
 /
 &ELECTRONS
     conv_thr = 1.0d-8,
