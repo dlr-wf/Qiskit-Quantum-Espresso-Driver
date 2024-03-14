@@ -29,5 +29,6 @@ if __name__ == "__main__":
     # FIXME: Get numpy ground state solver running
     try:
         result = solver.solve(problem)
+        print(result)
     except QiskitError as e:
         print("Could not find ground-state!")

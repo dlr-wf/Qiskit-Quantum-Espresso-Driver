@@ -2,7 +2,9 @@
 [![DOI](https://zenodo.org/badge/742501230.svg)](https://zenodo.org/doi/10.5281/zenodo.10513424)
 
 ## Disclaimer:
-Since [qiskit_nature](https://qiskit-community.github.io/qiskit-nature/) does indirectly not support complex expansion coefficients (see [this issue](https://github.com/qiskit-community/qiskit-nature/issues/1351)) the provided code does currently not work with qiskit_nature.
+**The code is broken**:x:. Since [qiskit_nature](https://qiskit-community.github.io/qiskit-nature/) does indirectly not support complex expansion coefficients (see [this issue](https://github.com/qiskit-community/qiskit-nature/issues/1351)) the provided code does currently not work with qiskit_nature. Since the Kohn-Sham orbitals are expanded in plane-waves with complex expansion coeffiecients, the overlap matrix is complex. As described in [this issue](https://github.com/qiskit-community/qiskit-nature/issues/1351), the overlap matrix is calculated the wrong way and needs to be casted to a real matrix. This is especially relavant if the qiskit_algorithm [NumPyMinimumEigensolver](https://qiskit-community.github.io/qiskit-algorithms/stubs/qiskit_algorithms.NumPyMinimumEigensolver.html) in combination with the [default filter criterion](https://qiskit-community.github.io/qiskit-nature/stubs/qiskit_nature.second_q.problems.ElectronicStructureProblem.html#qiskit_nature.second_q.problems.ElectronicStructureProblem.get_default_filter_criterion) is used. The default filter criterion enforces that the ground state has the correct [number of particles](https://qiskit-community.github.io/qiskit-nature/stubs/qiskit_nature.second_q.properties.ParticleNumber.html#particlenumber), a [magnetization](https://qiskit-community.github.io/qiskit-nature/stubs/qiskit_nature.second_q.properties.Magnetization.html#magnetization) of zero and an [angular momentum](https://qiskit-community.github.io/qiskit-nature/stubs/qiskit_nature.second_q.properties.AngularMomentum.html#angularmomentum) of zero. The angular momentum operator is defined by the overlap matrix between spin-up and spin-down molecular orbitals, i.e. Kohn-Sham orbitals in our case.
+
+Besides that, spin-polarized DFT calculations result in a non-zero ($\sim10^{-8}$) angular momentum of the ground-state. This causes the [NumPyMinimumEigensolver](https://qiskit-community.github.io/qiskit-algorithms/stubs/qiskit_algorithms.NumPyMinimumEigensolver.html) in combination with the [default filter criterion](https://qiskit-community.github.io/qiskit-nature/stubs/qiskit_nature.second_q.problems.ElectronicStructureProblem.html#qiskit_nature.second_q.problems.ElectronicStructureProblem.get_default_filter_criterion) to not find the ground-state. After the above mentionend [issue](https://github.com/qiskit-community/qiskit-nature/issues/1351) is resolved, we will work on fixing spin-polarized DFT calculations.
 
 ## Introduction
 This repository provides an interface between the [QuantumEspresso](https://www.quantum-espresso.org/) DFT software and [Qiskit](https://www.ibm.com/quantum/qiskit). QuantumEspresso uses a plane-wave basis to express the Kohn-Sham orbitals. We extract the Kohn-Sham orbitals from a QuantumEspresso calculation to construct a many-body hamiltonian in Qiskit by calculating the necessary matrix elements.
@@ -24,7 +26,7 @@ Note that the `QE_Driver` class in [qe_driver.py](qiskit_nature_qe/qe_driver.py)
 ## Formulas
 ### ERIs via pair densities
 We calculate the electron repulsion integrals (ERIs) given as
-$$h_{tuvw} = \int \int \frac{\phi^*_t(r_1)  \phi^*_u(r_2) \phi_v(r_2)  \phi_w(r_1)}{|r_1-r_2|}dr_1dr_2$$
+$$h_{tuvw} = \int \int \frac{\phi^\ast_t(r_1)  \phi^\ast_u(r_2) \phi_v(r_2)  \phi_w(r_1)}{|r_1-r_2|}dr_1dr_2$$
 In [eri_pair_densities.py](eri_pair_densities.py) we calculate the ERIs via pair densities $\rho_{tu}(r)=\psi^\ast_t(r)\psi_u(r)$ of real space wavefunctions $\psi_t(r)$. Note that all real space coordinates $r$ are vectors but we ommit the vector arrow for brevity. With this the ERIs $h_{tuvw}$ in the Kohn-Sham basis can be written as
 $$h_{tuvw} = 4\pi \sum_{\substack{p, p\neq 0}} \frac{\rho^\ast_{tw}(p) \rho_{uv}(p)}{|p|^2}$$
 with $\rho_{tu}(p)=\int\rho_{tu}(r) e^{-ip\cdot r}\mathrm{d}r$ which is the Fourier transform of $\rho_{tu}(r)$. Therefore $\rho_{tu}(p)$ is the convolution between $\psi^\ast_t(p)$ and $\psi_u(p)$: $\rho_{tu}(p)=\psi^\ast_t(p)*\psi_u(p)$.
@@ -55,6 +57,7 @@ where we assumed a orthonormal basis in the last step in defining $c_{tu}$.
 In the momentum basis using the Fourier transformation of kinetic energy and the coulomb potential we find:
 $$t_{tu}= \frac{1}{2}\int\phi_t(p)p^2 \phi_u(p)\mathrm{d}p$$
 $$u_{tu} = \frac{4\pi}{\Omega} \sum_{p,q,p\neq q} \phi_t(p)^\ast \phi_t(q) \frac{1}{|q-p|^2} \sum_I   e^{-i (q-p) \cdot R_I} $$
+where we again avoid the singularity at $p=q$ by ommitting these momenta.
 
 
 **Notes:**

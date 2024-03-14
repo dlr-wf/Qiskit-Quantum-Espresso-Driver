@@ -22,3 +22,5 @@ if __name__ == "__main__":
 
     solver = GroundStateEigensolver(mapper, algo)
     result = solver.solve(problem)
+
+    print(result)
