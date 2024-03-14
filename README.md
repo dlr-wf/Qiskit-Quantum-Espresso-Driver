@@ -26,7 +26,7 @@ Note that the `QE_Driver` class in [qe_driver.py](qiskit_nature_qe/qe_driver.py)
 ## Formulas
 ### ERIs via pair densities
 We calculate the electron repulsion integrals (ERIs) given as
-$$h_{tuvw} = \int \int \frac{\phi^\ast_t(r_1)  \phi^\ast_u(r_2) \phi_v(r_2)  \phi_w(r_1)}{|r_1-r_2|}dr_1dr_2$$
+$$h_{tuvw} = \int \int \frac{\psi^\ast_t(r_1)  \psi^\ast_u(r_2) \psi_v(r_2)  \psi_w(r_1)}{|r_1-r_2|}dr_1dr_2$$
 In [eri_pair_densities.py](eri_pair_densities.py) we calculate the ERIs via pair densities $\rho_{tu}(r)=\psi^\ast_t(r)\psi_u(r)$ of real space wavefunctions $\psi_t(r)$. Note that all real space coordinates $r$ are vectors but we ommit the vector arrow for brevity. With this the ERIs $h_{tuvw}$ in the Kohn-Sham basis can be written as
 $$h_{tuvw} = 4\pi \sum_{\substack{p, p\neq 0}} \frac{\rho^\ast_{tw}(p) \rho_{uv}(p)}{|p|^2}$$
 with $\rho_{tu}(p)=\int\rho_{tu}(r) e^{-ip\cdot r}\mathrm{d}r$ which is the Fourier transform of $\rho_{tu}(r)$. Therefore $\rho_{tu}(p)$ is the convolution between $\psi^\ast_t(p)$ and $\psi_u(p)$: $\rho_{tu}(p)=\psi^\ast_t(p)*\psi_u(p)$.
@@ -46,17 +46,17 @@ $$h_{tuvw}=\sum_{\substack{p, p \neq 0}} \frac{4\pi}{|p|^2} \rho^\ast_{tw}(p) \r
 
 ### One-Electron Integrals
 The one-electron integrals
-$$h_{tu}=\int \phi^\ast_t(r) \left( -\frac{1}{2} \nabla^2 - \sum_{I} \frac{Z_I}{R_I- r} + \sum_{I\lt J} \frac{Z_I Z_J}{|R_I-R_J|} \right) \phi_u(r)\mathrm{d}r$$
+$$h_{tu}=\int \psi^\ast_t(r) \left( -\frac{1}{2} \nabla^2 - \sum_{I} \frac{Z_I}{R_I- r} + \sum_{I\lt J} \frac{Z_I Z_J}{|R_I-R_J|} \right) \psi_u(r)\mathrm{d}r$$
 are also calculated in the plane-wave basis. We split the above formula into its three parts:
 $$h_{tu}=t_{tu} - u_{tu} +c_{tu}$$
 with
-$$t_{tu}=\int \phi^\ast_t(r) \left(  -\frac{1}{2} \nabla^2 \right) \phi_u(r)\mathrm{d}r$$
-$$u_{tu}=\int \phi^\ast_t(r) \left( \sum_{I} \frac{Z_I}{R_I- r} \right) \phi_u(r)\mathrm{d}r$$
-$$c_{tu}=\int \phi^\ast_t(r)  \phi_u(r)\mathrm{d}r \left(  \sum_{I\lt J} \frac{Z_I Z_J}{|R_I-R_J|} \right)=\sum_{I\lt J} \frac{Z_I Z_J}{|R_I-R_J|}$$
+$$t_{tu}=\int \psi^\ast_t(r) \left(  -\frac{1}{2} \nabla^2 \right) \psi_u(r)\mathrm{d}r$$
+$$u_{tu}=\int \psi^\ast_t(r) \left( \sum_{I} \frac{Z_I}{R_I- r} \right) \psi_u(r)\mathrm{d}r$$
+$$c_{tu}=\int \psi^\ast_t(r)  \psi_u(r)\mathrm{d}r \left(  \sum_{I\lt J} \frac{Z_I Z_J}{|R_I-R_J|} \right)=\sum_{I\lt J} \frac{Z_I Z_J}{|R_I-R_J|}$$
 where we assumed a orthonormal basis in the last step in defining $c_{tu}$.
 In the momentum basis using the Fourier transformation of kinetic energy and the coulomb potential we find:
-$$t_{tu}= \frac{1}{2}\int\phi_t(p)p^2 \phi_u(p)\mathrm{d}p$$
-$$u_{tu} = \frac{4\pi}{\Omega} \sum_{p,q,p\neq q} \phi_t(p)^\ast \phi_t(q) \frac{1}{|q-p|^2} \sum_I   e^{-i (q-p) \cdot R_I} $$
+$$t_{tu}= \frac{1}{2}\int\psi_t(p)p^2 \psi_u(p)\mathrm{d}p$$
+$$u_{tu} = \frac{4\pi}{\Omega} \sum_{p,q,p\neq q} \psi_t(p)^\ast \psi_t(q) \frac{1}{|q-p|^2} \sum_I   e^{-i (q-p) \cdot R_I} $$
 where we again avoid the singularity at $p=q$ by ommitting these momenta.
 
 
