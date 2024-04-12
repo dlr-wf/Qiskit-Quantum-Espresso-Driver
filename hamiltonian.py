@@ -21,7 +21,7 @@ import calc_matrix_elements
 
 
 class second_quant_hamiltonian:
-    """
+    r"""
     Defines a second-quanitzation hamiltonian of the form
     .. math::
         H = \sum_{pq} h_{pq} a_p^\dagger a_q + 1/2 \sum_{pqrs} h_{pqrs} a_p^\dagger a_q^\dagger a_r a_s
@@ -126,6 +126,8 @@ class second_quant_hamiltonian:
         energy = problem.hamiltonian
         fermionic_op = energy.second_q_op()
         pauli_sum_op = mapper.map(fermionic_op)
+        
+        print(f"pauli_sum_op.num_qubits: {pauli_sum_op.num_qubits}")
 
         # Qubit mapping
         initial_state = HartreeFock(
@@ -139,6 +141,9 @@ class second_quant_hamiltonian:
             mapper,
             initial_state=initial_state,
         )
+        
+        
+        print(f"ansatz.num_qubits: {ansatz.num_qubits}")
 
         # initial_state.draw(
         #     "mpl", filename=os.path.join("results", "UCCSD_initial_state")

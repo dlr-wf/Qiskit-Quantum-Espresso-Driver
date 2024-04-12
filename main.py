@@ -1,4 +1,5 @@
 import os
+from warnings import warn
 import numpy as np
 import xmltodict
 from wfc import Wfc
@@ -15,9 +16,14 @@ if __name__ == "__main__":
     
     dat_file = os.path.join("qe_files", "out_Mg", "Mg.save", "wfc1.dat")
     xml_file = os.path.join("qe_files", "out_Mg", "Mg.save", "data-file-schema.xml")
+    
+    dat_file = os.path.join("qe_files", "out_Mg_paw", "Mg.save", "wfc1.dat")
+    xml_file = os.path.join("qe_files", "out_Mg_paw", "Mg.save", "data-file-schema.xml")
 
     # Choose Kohn-Sham orbitals
-    orbitals_indices = [0, 1]
+    orbitals_indices = [0, 1] # H2
+    orbitals_indices = [9, 10] # Mg ultrasoft
+    orbitals_indices = [1, 2] # Mg paw
 
     wfc1_ncpp = Wfc.from_file(dat_file, xml_file)
 
@@ -26,6 +32,9 @@ if __name__ == "__main__":
     reference_energy = xml_dict["qes:espresso"]["output"]["total_energy"]["etot"]
 
     overlaps_ncpp = wfc1_ncpp.get_overlaps()
+    
+    if not np.allclose(overlaps_ncpp, np.eye(overlaps_ncpp.shape[0])):
+        warn("The wavefunctions are not orthonormal!")
 
     p = wfc1_ncpp.k_plus_G  # shape (#waves, 3)
     c_ip = wfc1_ncpp.evc  # shape (#bands, #waves)
@@ -60,7 +69,7 @@ if __name__ == "__main__":
         wfc1_ncpp.gamma_only is True
     ), "Calculating ERIs via pair densities is only implemented for the gamma-point!"
     h_pqrs: np.ndarray = (
-        eri_pair_densities.eri_gamma(p=p, c_ip=c_ip_orbitals) / wfc1_ncpp.cell_volume
+        eri_pair_densities.eri_gamma(p=p, c_ip=c_ip_orbitals, b=wfc1_ncpp.b, mill=wfc1_ncpp.mill) / wfc1_ncpp.cell_volume
     )
 
     h_pq = iTj_orbitals - iUj_orbitals

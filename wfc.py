@@ -1,3 +1,4 @@
+from warnings import warn
 import numpy as np
 import h5py
 import xmltodict
@@ -323,5 +324,17 @@ class Wfc:
     def get_orbitals_by_index(self, indices: list | np.ndarray):
         occupations = self.occupations_binary[indices]
         c_ip_orbitals = self.evc[indices]
+        
+        warn_msg = "The selected orbitals for the active space are all fully occupied or unoccupied!"
+        occ_str = ' '.join([f"|{val}" if i == indices[0] else f"{val}|" if i == indices[1] else f"{val}" for i, val in enumerate(self.occupations_binary.astype(int))])
+        warn_msg += f" You selected the following active space: {occ_str}"
+        if np.any(occupations == 2):
+            if not np.any(occupations == 1):
+                warn(warn_msg)
+        elif np.all(occupations == 0):
+            warn(warn_msg)
+        else:
+            if not np.any(occupations == 0):
+                warn(warn_msg)
 
         return occupations, c_ip_orbitals
