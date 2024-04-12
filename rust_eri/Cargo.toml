@@ -1,0 +1,16 @@
+[package]
+name = "eri_rs"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+clap = {version="4.3.19", features = ["derive", "string"]}
+hdf5 = "0.8.1"
+ndarray = {version="0.15.6", features = ["rayon"]}
+ndarray-linalg = {version="0.16.0", features = ["intel-mkl-static"]}
+num-complex = "0.4.3"
+rayon = "1.7.0"
+xml = "0.8.10"
+xmltree = "0.10.3"
