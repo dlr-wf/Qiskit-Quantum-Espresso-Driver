@@ -22,7 +22,7 @@ if __name__ == "__main__":
 
     # Choose Kohn-Sham orbitals
     orbitals_indices = [0, 1] # H2
-    orbitals_indices = [9, 10] # Mg ultrasoft
+    orbitals_indices = [9, 10] # Mg normconserving
     orbitals_indices = [1, 2] # Mg paw
 
     wfc1_ncpp = Wfc.from_file(dat_file, xml_file)
