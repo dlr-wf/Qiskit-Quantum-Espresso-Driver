@@ -68,7 +68,7 @@ def get_frozen_core(
     return frozen_core_energy, v_core
 
 
-def nuclear_repulsion_energy(atoms: list, cell_volume: float) -> float:
+def nuclear_repulsion_energy(c_ip: np.array, atoms: list, cell_volume: float) -> float:
     """Calculate nuclear repulsion energy in Hartree units
 
     Args:
@@ -78,6 +78,8 @@ def nuclear_repulsion_energy(atoms: list, cell_volume: float) -> float:
     Returns:
         float: Nuclear repulsion energy
     """
+    overlap = np.einsum("ij, kj -> ik", c_ip.conj(), c_ip)
+
     # nuclear repulsion = 1 / cell_volume \sum_{I<J} Z_I Z_J/|R_I-R_J|
     # Nuclear repulsion energy in Hartree units
     nuclear_repulsion = 0.0
@@ -91,7 +93,7 @@ def nuclear_repulsion_energy(atoms: list, cell_volume: float) -> float:
             # print(r)
             nuclear_repulsion += z_i * z_j / r
 
-    return nuclear_repulsion / cell_volume
+    return overlap * nuclear_repulsion / cell_volume
 
 
 def check_symmetry_one_body_matrix(matrix: np.ndarray):

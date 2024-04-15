@@ -94,13 +94,22 @@ class second_quant_hamiltonian:
         num_particles = (int(np.sum(self.occupations)), int(np.sum(self.occupations)))
 
         # Qiskit calculation
-        integrals = ElectronicIntegrals.from_raw_integrals(
-            self.h_pq, self.h_pqrs, auto_index_order=True
-        )
-        qiskit_energy = ElectronicEnergy(integrals)
-        qiskit_energy.nuclear_repulsion_energy = (
-            self.nuclear_repulsion_energy
-        )  # *num_particles_sum
+        if isinstance(self.nuclear_repulsion_energy, np.ndarray):
+            integrals = ElectronicIntegrals.from_raw_integrals(
+                self.h_pq + self.nuclear_repulsion_energy,
+                self.h_pqrs,
+                auto_index_order=True,
+            )
+            qiskit_energy = ElectronicEnergy(integrals)
+            qiskit_energy.nuclear_repulsion_energy = 0.0
+        else:
+            integrals = ElectronicIntegrals.from_raw_integrals(
+                self.h_pq, self.h_pqrs, auto_index_order=True
+            )
+            qiskit_energy = ElectronicEnergy(integrals)
+            qiskit_energy.nuclear_repulsion_energy = (
+                self.nuclear_repulsion_energy
+            )  # *num_particles_sum
         qiskit_energy.constants["frozen_core_energy"] = self.frozen_core_energy
         qiskit_problem = ElectronicStructureProblem(qiskit_energy)
 
@@ -126,7 +135,7 @@ class second_quant_hamiltonian:
         energy = problem.hamiltonian
         fermionic_op = energy.second_q_op()
         pauli_sum_op = mapper.map(fermionic_op)
-        
+
         print(f"pauli_sum_op.num_qubits: {pauli_sum_op.num_qubits}")
 
         # Qubit mapping
@@ -141,8 +150,7 @@ class second_quant_hamiltonian:
             mapper,
             initial_state=initial_state,
         )
-        
-        
+
         print(f"ansatz.num_qubits: {ansatz.num_qubits}")
 
         # initial_state.draw(
