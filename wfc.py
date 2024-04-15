@@ -49,9 +49,9 @@ class Wfc:
         self.b = np.array(
             [b1, b2, b3]
         )  # b1 in first row, b2 in second row, b3 in third row.
-        
+
         self.G = np.einsum("ij,jk->ik", mill, self.b)
-        
+
         self.k_plus_G = xk + self.G
         self.k_plus_G_norm = np.linalg.norm(self.k_plus_G, ord=2, axis=1)
 
@@ -80,8 +80,13 @@ class Wfc:
         atoms_dict = xml_dict["qes:espresso"]["input"]["atomic_structure"][
             "atomic_positions"
         ]["atom"]
+
+        if isinstance(atoms_dict, dict):
+            atoms_dict = [atoms_dict]
+
         atoms = []
         for atom in atoms_dict:
+            print(f"for atom in atoms_dict: {atom}")
             atoms.append(
                 {
                     "element": atom["@name"],
@@ -118,7 +123,9 @@ class Wfc:
         self.cell_volume = self.a1.dot(np.cross(self.a2, self.a3))
 
         # # Read reciprocal lattice vectors from xml file
-        reciprocal_cell = xml_dict["qes:espresso"]["output"]["basis_set"]["reciprocal_lattice"]
+        reciprocal_cell = xml_dict["qes:espresso"]["output"]["basis_set"][
+            "reciprocal_lattice"
+        ]
         self.b1_xml = np.fromstring(reciprocal_cell["b1"], sep=" ", dtype=np.float32)
         self.b2_xml = np.fromstring(reciprocal_cell["b2"], sep=" ", dtype=np.float32)
         self.b3_xml = np.fromstring(reciprocal_cell["b3"], sep=" ", dtype=np.float32)
@@ -129,7 +136,7 @@ class Wfc:
         # assert np.allclose(
         #     np.array([self.b1, self.b2, self.b3]), np.array([b1, b2, b3])
         # ), f"Reciprocal lattice vectors in {output_xml} do not match the given reciprocal lattice vectors b1, b2, b3 (possibly from dat/hdf5 file)"
-        
+
         # Read lattice vectors from xml file
         cell = xml_dict["qes:espresso"]["input"]["atomic_structure"]["cell"]
         a1 = np.fromstring(cell["a1"], sep=" ", dtype=np.float32)
@@ -324,9 +331,18 @@ class Wfc:
     def get_orbitals_by_index(self, indices: list | np.ndarray):
         occupations = self.occupations_binary[indices]
         c_ip_orbitals = self.evc[indices]
-        
+
         warn_msg = "The selected orbitals for the active space are all fully occupied or unoccupied!"
-        occ_str = ' '.join([f"|{val}" if i == indices[0] else f"{val}|" if i == indices[1] else f"{val}" for i, val in enumerate(self.occupations_binary.astype(int))])
+        occ_str = " ".join(
+            [
+                (
+                    f"|{val}"
+                    if i == indices[0]
+                    else f"{val}|" if i == indices[1] else f"{val}"
+                )
+                for i, val in enumerate(self.occupations_binary.astype(int))
+            ]
+        )
         warn_msg += f" You selected the following active space: {occ_str}"
         if np.any(occupations == 2):
             if not np.any(occupations == 1):
