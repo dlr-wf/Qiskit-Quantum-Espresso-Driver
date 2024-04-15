@@ -55,7 +55,7 @@ class Wfc:
         # If only Γ point is sampled, only positive half of
         # the plane wave expansion coefficients are saved. Generate and append negative half here.
         # See https://docs.abinit.org/theory/wavefunctions/#plane-wave-basis-set-sphere
-        if self.gamma_only is True:
+        if self.gamma_only:
             self.evc_org = self.evc.copy()
             self.G_org = self.G.copy()
             self.mill_org = self.mill.copy()

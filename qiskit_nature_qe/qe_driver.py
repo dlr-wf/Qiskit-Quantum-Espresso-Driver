@@ -26,7 +26,7 @@ class QE_Driver(ElectronicStructureDriver):
         """
         super().__init__()
 
-        if isinstance(wfc_files, list) is True:
+        if isinstance(wfc_files, list):
             assert (
                 len(wfc_files) == 2
             ), f"Did not provide two but {len(wfc_files)} wfc files: {wfc_files}!"
@@ -195,7 +195,7 @@ class QE_Driver(ElectronicStructureDriver):
         #     We have to further investigate different spin-polarized DFT calculation and
         #     the angular momentum of their many-body ground states to check if
         #     there is a bug in qiskit_nature or in our understand of the overlap matrix
-        overlap = np.eye(self.c_ip_up.shape[1])
+        overlap = np.eye(self.c_ip_up.shape[1], dtype=np.float64)
         # overlap = None
 
         # Molecular orbitals (MOs) are the Kohn-Sham orbitals
@@ -283,10 +283,10 @@ class QE_Driver(ElectronicStructureDriver):
     def calc_eri(self):
         # Calculate ERIs via pair density
         assert (
-            self.wfc_up_obj.gamma_only is True
+            self.wfc_up_obj.gamma_only
         ), "Calculating ERIs via pair densities is only implemented for the gamma-point!"
         assert (
-            self.wfc_dw_obj.gamma_only is True
+            self.wfc_dw_obj.gamma_only
         ), "Calculating ERIs via pair densities is only implemented for the gamma-point!"
 
         eri_up: np.ndarray = (
